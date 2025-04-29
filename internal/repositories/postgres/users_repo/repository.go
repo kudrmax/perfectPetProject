@@ -1,4 +1,4 @@
-package users
+package users_repo
 
 import "my/perfectPetProject/internal/models"
 

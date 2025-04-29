@@ -1,4 +1,4 @@
-package posts
+package posts_repo
 
 import (
 	"my/perfectPetProject/internal/models"
