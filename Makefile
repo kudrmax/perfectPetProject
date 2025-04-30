@@ -16,9 +16,9 @@ help: ## Показать все команды
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 codegen: ## Сгенерировать API и rpc клиенты для Go
+	@$(MAKE) _clean-openapi-in-one-file
 	@$(MAKE) _create-openapi-in-one-file
-	GOFLAGS=-mod=mod go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
-	rm -f $(OPENAPI_IN_ONE_FILE)
+	go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
 	@$(MAKE) _clean-openapi-in-one-file
 
 # === PRIVATE COMMANDS ===
