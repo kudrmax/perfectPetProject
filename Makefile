@@ -28,3 +28,4 @@ _create-openapi-in-one-file: # Создать один общий openapi фай
 
 _clean-openapi-in-one-file: # Удалить один общий openapi файл
 	@rm -f $(OPENAPI_IN_ONE_FILE)
+
