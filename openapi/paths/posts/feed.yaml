@@ -1,6 +1,6 @@
 get:
   summary: "Получить ленту постов"
-  operationId: getFeed
+  operationId: "getFeed"
   responses:
     200:
       description: "Список постов"
