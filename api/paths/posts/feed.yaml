@@ -1,0 +1,14 @@
+get:
+  summary: "Получить ленту постов"
+  operationId: getFeed
+  responses:
+    200:
+      description: "Список постов"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/schemas.yaml#/Post'
+    500:
+      $ref: '../../components/responses.yaml#/responses/InternalError'

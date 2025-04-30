@@ -1,0 +1,16 @@
+post:
+  summary: "Создать новый пост"
+  operationId: "createPost"
+  requestBody:
+    $ref: "../../components/requestBodies.yaml#/requestBodies/NewPost"
+  responses:
+    201:
+      description: "Пост создан"
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas.yaml#/Post"
+    400:
+      $ref: "../../components/responses.yaml#/responses/BadRequest"
+    500:
+      $ref: '../../components/responses.yaml#/responses/InternalError'

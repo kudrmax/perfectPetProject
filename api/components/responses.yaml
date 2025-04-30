@@ -1,0 +1,20 @@
+responses:
+  BadRequest:
+    description: "Bad request"
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+  InternalError:
+    description: "Internal Error"
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+

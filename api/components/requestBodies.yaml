@@ -1,0 +1,13 @@
+requestBodies:
+  NewPost:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - text
+          properties:
+            text:
+              type: string
+              minLength: 1
