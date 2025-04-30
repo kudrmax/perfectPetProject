@@ -1,0 +1,19 @@
+BadRequest:
+  description: "Bad request (400)"
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          error:
+            type: string
+InternalError:
+  description: "Internal Error (500)"
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          error:
+            type: string
+
