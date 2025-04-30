@@ -4,6 +4,8 @@ go 1.24.2
 
 require github.com/go-chi/chi/v5 v5.2.1
 
+require github.com/josharian/impl v1.4.0
+
 require (
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
 	github.com/getkin/kin-openapi v0.127.0 // indirect
