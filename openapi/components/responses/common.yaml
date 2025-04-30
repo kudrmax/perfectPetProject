@@ -4,6 +4,8 @@ BadRequest:
     application/json:
       schema:
         type: object
+        required:
+          - error
         properties:
           error:
             type: string
@@ -13,6 +15,8 @@ InternalError:
     application/json:
       schema:
         type: object
+        required:
+          - error
         properties:
           error:
             type: string

@@ -25,12 +25,12 @@ type PostCreate struct {
 
 // BadRequest defines model for BadRequest.
 type BadRequest struct {
-	Error *string `json:"error,omitempty"`
+	Error string `json:"error"`
 }
 
 // InternalError defines model for InternalError.
 type InternalError struct {
-	Error *string `json:"error,omitempty"`
+	Error string `json:"error"`
 }
 
 // CreatePostJSONRequestBody defines body for CreatePost for application/json ContentType.

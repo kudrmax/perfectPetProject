@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/kudrmax/perfectPetProject/internal/api"
-	"github.com/kudrmax/perfectPetProject/internal/common/pointer"
 )
 
 type Handler struct{}
@@ -24,6 +23,6 @@ func writeJson(w http.ResponseWriter, status int, data any) {
 
 func writeBadRequest(w http.ResponseWriter, err error) {
 	writeJson(w, http.StatusBadRequest, api.BadRequest{
-		Error: pointer.To(err.Error()),
+		Error: err.Error(),
 	})
 }
