@@ -3,3 +3,4 @@ output: internal/api/openapi.gen.go
 generate:
   - types
   - chi-server
+  - spec
