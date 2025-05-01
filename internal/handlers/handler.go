@@ -5,9 +5,27 @@ import (
 	"net/http"
 
 	"github.com/kudrmax/perfectPetProject/internal/api"
+	"github.com/kudrmax/perfectPetProject/internal/models"
 )
 
-type Handler struct{}
+type (
+	postRepository interface {
+		GetAll() []*models.Post
+		Create(post *models.Post) (*models.Post, error)
+	}
+)
+
+type Handler struct {
+	postRepository postRepository
+}
+
+func NewHandler(
+	postRepository postRepository,
+) *Handler {
+	return &Handler{
+		postRepository: postRepository,
+	}
+}
 
 func parseBody[T any](r *http.Request) (T, error) {
 	var body T
@@ -23,6 +41,12 @@ func writeJson(w http.ResponseWriter, status int, data any) {
 
 func writeBadRequest(w http.ResponseWriter, err error) {
 	writeJson(w, http.StatusBadRequest, api.BadRequest{
+		Error: err.Error(),
+	})
+}
+
+func writeInternalError(w http.ResponseWriter, err error) {
+	writeJson(w, http.StatusInternalServerError, api.InternalError{
 		Error: err.Error(),
 	})
 }
