@@ -1,6 +1,6 @@
-package users_repo
+package users_repository
 
-import "my/perfectPetProject/internal/models"
+import "github.com/kudrmax/perfectPetProject/internal/models"
 
 type Repository struct{}
 
