@@ -5,8 +5,12 @@ info:
   version: "0.1.0"
   description: "API для Perfect Pet Project"
   contact:
-    name: "Max Kudryashov"
+    name: "Elina Chinkina"
     url: "https://github.com/kudrmax"
+
+servers:
+  - url: http://localhost:8080
+    description: "Локальный сервер для разработки"
 
 paths:
   /api/1/posts/create_post:
