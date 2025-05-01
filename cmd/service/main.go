@@ -1,14 +1,70 @@
 package main
 
 import (
-	"my/perfectPetProject/internal/repositories/postgres/posts_repo"
-	"my/perfectPetProject/internal/repositories/postgres/users_repo"
-	"my/perfectPetProject/internal/services/posts"
+	"log"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/mvrilo/go-redoc"
+	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
+
+	"github.com/kudrmax/perfectPetProject/internal/api"
+	"github.com/kudrmax/perfectPetProject/internal/handlers"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/posts_repository"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
+	"github.com/kudrmax/perfectPetProject/internal/services/posts"
 )
 
 func main() {
-	userRepository := users_repo.NewRepository()
-	postRepository := posts_repo.NewRepository()
-	postService := posts.NewService(postRepository, userRepository)
-	_ = postService
+	rootRouter := chi.NewRouter()
+
+	rootRouter.Mount("/docs", getSwaggerRouter())
+	rootRouter.Mount("/", getApiRouter())
+
+	log.Println("Server started at http://localhost:8080")
+	log.Println("OpenAPI docs at http://localhost:8080/docs/openapi")
+	if err := http.ListenAndServe(":8080", rootRouter); err != nil {
+		log.Fatalf("❌ server exited with error: %v", err)
+	}
+}
+
+func getApiRouter() http.Handler {
+	swagger, err := api.GetSwagger()
+	if err != nil {
+		log.Fatalf("❌ failed to load swagger: %v", err)
+	}
+	swagger.Servers = nil
+
+	userRepository := users_repository.NewRepository()
+	postRepository := posts_repository.NewRepository()
+	postService := posts.NewService(
+		postRepository,
+		userRepository,
+	)
+	handler := handlers.NewHandler(postService)
+
+	router := chi.NewRouter()
+	router.Use(nethttpmiddleware.OapiRequestValidator(swagger)) // валидация API
+	router.Mount("/", api.Handler(handler))
+
+	return router
+}
+
+func getSwaggerRouter() http.Handler {
+	doc := redoc.Redoc{
+		Title:       "API Documentation",
+		Description: "Интерактивная документация для API",
+		SpecFile:    "./openapi/openapi.gen.yaml",
+		SpecPath:    "/docs/openapi.yaml", // относительный путь внутри /docs
+		DocsPath:    "/docs/openapi",      // будет доступен как /docs/openapi
+	}
+
+	router := chi.NewRouter()
+
+	router.Get("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, doc.SpecFile)
+	})
+	router.Get("/openapi", doc.Handler())
+
+	return router
 }

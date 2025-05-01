@@ -3,7 +3,21 @@ package posts
 import (
 	"time"
 
-	"my/perfectPetProject/internal/models"
+	"github.com/kudrmax/perfectPetProject/internal/models"
+)
+
+type (
+	postRepository interface {
+		GetAll() []*models.Post
+		Create(post *models.Post) (*models.Post, error)
+		Delete(id int64) error
+	}
+
+	userRepository interface {
+		GetById(id int64) *models.User
+		Create(user *models.User) (*models.User, error)
+		Delete(id int64) error
+	}
 )
 
 type Service struct {
