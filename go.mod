@@ -6,6 +6,7 @@ require github.com/go-chi/chi/v5 v5.2.1
 
 require (
 	github.com/josharian/impl v1.4.0
+	github.com/mvrilo/go-redoc v0.1.5
 	github.com/oapi-codegen/nethttp-middleware v1.1.2
 )
 

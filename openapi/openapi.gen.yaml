@@ -8,9 +8,9 @@ info:
   contact:
     name: Elina Chinkina
     url: https://github.com/kudrmax
-servers:
-  - url: http://localhost:8080
-    description: Локальный сервер для разработки
+#servers:
+#  - url: http://localhost:8080
+#    description: Локальный сервер для разработки
 paths:
   /api/1/posts/create_post:
     post:
