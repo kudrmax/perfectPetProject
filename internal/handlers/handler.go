@@ -9,21 +9,21 @@ import (
 )
 
 type (
-	postRepository interface {
-		GetAll() []*models.Post
-		Create(post *models.Post) (*models.Post, error)
+	postService interface {
+		GetAllPosts() []*models.Post
+		CreatePost(text string, userId int64) (*models.Post, error)
 	}
 )
 
 type Handler struct {
-	postRepository postRepository
+	postService postService
 }
 
 func NewHandler(
-	postRepository postRepository,
+	postService postService,
 ) *Handler {
 	return &Handler{
-		postRepository: postRepository,
+		postService: postService,
 	}
 }
 

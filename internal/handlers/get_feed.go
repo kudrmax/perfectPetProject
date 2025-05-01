@@ -10,7 +10,7 @@ import (
 // GetFeed Получить ленту постов
 // (GET /api/1/posts/feed)
 func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
-	posts := h.postRepository.GetAll()
+	posts := h.postService.GetAllPosts()
 	writeJson(w, http.StatusOK, convertModelsToDto(posts))
 }
 

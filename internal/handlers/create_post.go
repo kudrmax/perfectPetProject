@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/kudrmax/perfectPetProject/internal/api"
 	"github.com/kudrmax/perfectPetProject/internal/models"
@@ -29,7 +28,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.postRepository.Create(convertPostToModel(&body))
+	post, err := h.postService.CreatePost(body.Text, 666)
 	if err != nil {
 		writeInternalError(w, CannotCreatePostErr)
 	}
@@ -43,13 +42,6 @@ func validateBody(body api.PostCreate) error {
 	}
 
 	return nil
-}
-
-func convertPostToModel(postDto *api.PostCreate) *models.Post {
-	return &models.Post{
-		Text:     postDto.Text,
-		Datetime: time.Now(),
-	}
 }
 
 func convertModelToDto(post *models.Post) *api.Post {
