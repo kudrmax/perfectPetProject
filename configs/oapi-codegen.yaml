@@ -1,6 +1,9 @@
+# дока: https://github.com/oapi-codegen/oapi-codegen
+# хороший гайд:
+
 package: api
 output: internal/api/openapi.gen.go
 generate:
-  - types
+  - strict-server
   - chi-server
-  - spec
+  - models
