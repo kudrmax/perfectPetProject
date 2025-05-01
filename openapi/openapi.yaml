@@ -1,0 +1,15 @@
+openapi: 3.0.3
+
+info:
+  title: Perfect Pet Project API
+  version: "0.1.0"
+  description: "API для Perfect Pet Project"
+  contact:
+    name: "Max Kudryashov"
+    url: "https://github.com/kudrmax"
+
+paths:
+  /api/1/posts/create_post:
+    $ref: 'paths/posts/create.yaml'
+  /api/1/posts/feed:
+    $ref: 'paths/posts/feed.yaml'

@@ -1,0 +1,31 @@
+# === CONFIGURATION ===
+
+OPENAPI_FILE := openapi/openapi.yaml
+OPENAPI_IN_ONE_FILE := openapi/openapi.gen.yaml
+OAPI_CONFIG := configs/oapi-codegen.yaml
+OAPI_PKG := github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+
+# === PUBLIC COMMANDS ===
+
+.PHONY: help codegen
+
+
+help: ## Показать все команды
+	@echo "Доступные команды:"
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+codegen: ## Сгенерировать API и rpc клиенты для Go
+	@$(MAKE) _clean-openapi-in-one-file
+	@$(MAKE) _create-openapi-in-one-file
+	go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
+	@$(MAKE) _clean-openapi-in-one-file
+
+# === PRIVATE COMMANDS ===
+
+_create-openapi-in-one-file: # Создать один общий openapi файл из нескольких
+	redocly bundle $(OPENAPI_FILE) --output - >> $(OPENAPI_IN_ONE_FILE)
+
+_clean-openapi-in-one-file: # Удалить один общий openapi файл
+	@rm -f $(OPENAPI_IN_ONE_FILE)
+
