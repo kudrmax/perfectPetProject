@@ -1,4 +1,4 @@
-PostCreate:
+TweetCreate:
   type: object
   required:
     - text

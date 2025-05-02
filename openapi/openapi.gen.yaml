@@ -12,16 +12,16 @@ servers:
   - url: http://localhost:8080
     description: Локальный сервер для разработки
 paths:
-  /api/1/posts/create_post:
+  /api/1/tweets/create_post:
     post:
       summary: Создать новый пост
-      operationId: createPost
+      operationId: createTweet
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostCreate'
+              $ref: '#/components/schemas/TweetCreate'
             examples:
               good:
                 summary: Good request body
@@ -37,12 +37,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Tweet'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalError'
-  /api/1/posts/feed:
+  /api/1/tweets/feed:
     get:
       summary: Получить ленту постов
       operationId: getFeed
@@ -54,12 +54,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Post'
+                  $ref: '#/components/schemas/Tweet'
         '500':
           $ref: '#/components/responses/InternalError'
 components:
   schemas:
-    PostCreate:
+    TweetCreate:
       type: object
       required:
         - text
@@ -67,7 +67,7 @@ components:
         text:
           type: string
           minLength: 1
-    Post:
+    Tweet:
       type: object
       required:
         - id

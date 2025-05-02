@@ -1,14 +1,14 @@
-package posts_repository
+package tweets_repository
 
 import "github.com/kudrmax/perfectPetProject/internal/models"
 
-type DbEmulation map[int]models.Post
+type DbEmulation map[int]models.Tweet
 
 func NewDbEmulation() DbEmulation {
 	return make(DbEmulation)
 }
 
-func (db *DbEmulation) CreatePost(post *models.Post) *models.Post {
+func (db *DbEmulation) Create(post *models.Tweet) *models.Tweet {
 	newId := db.getNewId()
 	post.Id = newId
 
@@ -17,8 +17,8 @@ func (db *DbEmulation) CreatePost(post *models.Post) *models.Post {
 	return post
 }
 
-func (db *DbEmulation) GetAllPosts() []*models.Post {
-	out := make([]*models.Post, 0, len(*db))
+func (db *DbEmulation) GetAll() []*models.Tweet {
+	out := make([]*models.Tweet, 0, len(*db))
 
 	for _, post := range *db {
 		out = append(out, &post)

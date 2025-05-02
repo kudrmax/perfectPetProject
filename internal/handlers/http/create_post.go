@@ -9,20 +9,20 @@ import (
 )
 
 var (
-	EmptyTextErr        = errors.New("empty text")
-	CannotCreatePostErr = errors.New("cannot create post")
+	EmptyTextErr         = errors.New("empty text")
+	CannotCreateTweetErr = errors.New("cannot create tweet")
 )
 
-func (h *Handler) CreatePost(ctx context.Context, request api.CreatePostRequestObject) (api.CreatePostResponseObject, error) {
+func (h *Handler) CreateTweet(ctx context.Context, request api.CreateTweetRequestObject) (api.CreateTweetResponseObject, error) {
 	text := request.Body.Text
 	userId := 666
 
-	post, err := h.postService.CreatePost(text, userId)
+	post, err := h.postService.Create(text, userId)
 	if err != nil {
-		return api.CreatePost500JSONResponse{InternalErrorJSONResponse: api.InternalErrorJSONResponse{
+		return api.CreateTweet500JSONResponse{InternalErrorJSONResponse: api.InternalErrorJSONResponse{
 			Error: err.Error(),
 		}}, nil
 	}
 
-	return api.CreatePost201JSONResponse(posts_converter.ToApiModel(*post)), nil
+	return api.CreateTweet201JSONResponse(posts_converter.ToApiModel(*post)), nil
 }

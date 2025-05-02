@@ -9,9 +9,9 @@ import (
 
 	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
 	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
-	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/posts_repository"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
-	"github.com/kudrmax/perfectPetProject/internal/services/posts"
+	"github.com/kudrmax/perfectPetProject/internal/services/tweets"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	rootRouter.Mount("/", getApiRouter())
 
 	log.Println("Server started at http://localhost:8080")
-	log.Println("API: http://localhost:8080/api/1/posts")
+	log.Println("API: http://localhost:8080/api/1/tweets")
 	log.Println("OpenAPI docs at http://localhost:8080/docs/openapi")
 	if err := http.ListenAndServe(":8080", rootRouter); err != nil {
 		log.Fatalf("❌ server exited with error: %v", err)
@@ -29,11 +29,11 @@ func main() {
 }
 
 func getApiRouter() http.Handler {
-	postService := posts.NewService(
-		posts_repository.NewRepository(),
+	tweetService := tweets.NewService(
+		tweets_repository.NewRepository(),
 		users_repository.NewRepository(),
 	)
-	handler := myHttp.NewHandler(postService)
+	handler := myHttp.NewHandler(tweetService)
 
 	router := chi.NewRouter()
 	server := api.NewStrictHandler(handler, nil)

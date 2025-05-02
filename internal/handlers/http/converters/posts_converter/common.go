@@ -5,16 +5,16 @@ import (
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
 
-func ToApiModel(post models.Post) api.Post {
-	return api.Post{
+func ToApiModel(post models.Tweet) api.Tweet {
+	return api.Tweet{
 		Id:        post.Id,
 		Text:      post.Text,
-		CreatedAt: post.Datetime,
+		CreatedAt: post.CreatedAt,
 	}
 }
 
-func ToApiModelSlice(posts []*models.Post) []api.Post {
-	apiPosts := make([]api.Post, 0, len(posts))
+func ToApiModelSlice(posts []*models.Tweet) []api.Tweet {
+	apiPosts := make([]api.Tweet, 0, len(posts))
 
 	for _, post := range posts {
 		apiPosts = append(apiPosts, ToApiModel(*post))
