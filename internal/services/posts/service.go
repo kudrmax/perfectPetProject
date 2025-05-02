@@ -10,13 +10,13 @@ type (
 	postRepository interface {
 		GetAll() []*models.Post
 		Create(post *models.Post) (*models.Post, error)
-		Delete(id int64) error
+		Delete(id int) error
 	}
 
 	userRepository interface {
-		GetById(id int64) *models.User
+		GetById(id int) *models.User
 		Create(user *models.User) (*models.User, error)
-		Delete(id int64) error
+		Delete(id int) error
 	}
 )
 
@@ -39,7 +39,7 @@ func (s *Service) GetAllPosts() []*models.Post {
 	return s.postRepository.GetAll()
 }
 
-func (s *Service) CreatePost(text string, userId int64) (*models.Post, error) {
+func (s *Service) CreatePost(text string, userId int) (*models.Post, error) {
 	post, _ := s.postRepository.Create(&models.Post{
 		Text:     text,
 		UserId:   userId,
@@ -49,7 +49,7 @@ func (s *Service) CreatePost(text string, userId int64) (*models.Post, error) {
 	return post, nil
 }
 
-func (s *Service) DeletePost(id int64) error {
+func (s *Service) DeletePost(id int) error {
 	_ = s.postRepository.Delete(id)
 	return nil
 }

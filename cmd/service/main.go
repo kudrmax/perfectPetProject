@@ -6,10 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mvrilo/go-redoc"
-	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 
-	"github.com/kudrmax/perfectPetProject/internal/api"
-	"github.com/kudrmax/perfectPetProject/internal/handlers"
+	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
+	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/posts_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/posts"
@@ -18,10 +17,11 @@ import (
 func main() {
 	rootRouter := chi.NewRouter()
 
-	rootRouter.Mount("/docs", getSwaggerRouter())
+	rootRouter.Mount("/docs", getRedocRouter())
 	rootRouter.Mount("/", getApiRouter())
 
 	log.Println("Server started at http://localhost:8080")
+	log.Println("API: http://localhost:8080/api/1/posts")
 	log.Println("OpenAPI docs at http://localhost:8080/docs/openapi")
 	if err := http.ListenAndServe(":8080", rootRouter); err != nil {
 		log.Fatalf("❌ server exited with error: %v", err)
@@ -29,28 +29,22 @@ func main() {
 }
 
 func getApiRouter() http.Handler {
-	swagger, err := api.GetSwagger()
-	if err != nil {
-		log.Fatalf("❌ failed to load swagger: %v", err)
-	}
-	swagger.Servers = nil
-
-	userRepository := users_repository.NewRepository()
-	postRepository := posts_repository.NewRepository()
 	postService := posts.NewService(
-		postRepository,
-		userRepository,
+		posts_repository.NewRepository(),
+		users_repository.NewRepository(),
 	)
-	handler := handlers.NewHandler(postService)
+	handler := myHttp.NewHandler(postService)
 
 	router := chi.NewRouter()
-	router.Use(nethttpmiddleware.OapiRequestValidator(swagger)) // валидация API
-	router.Mount("/", api.Handler(handler))
+	server := api.NewStrictHandler(handler, nil)
+
+	//router.Use(nethttpmiddleware.OapiRequestValidator(swagger)) // валидация API
+	router.Mount("/", api.Handler(server))
 
 	return router
 }
 
-func getSwaggerRouter() http.Handler {
+func getRedocRouter() http.Handler {
 	doc := redoc.Redoc{
 		Title:       "API Documentation",
 		Description: "Интерактивная документация для API",
@@ -67,4 +61,10 @@ func getSwaggerRouter() http.Handler {
 	router.Get("/openapi", doc.Handler())
 
 	return router
+}
+
+func getSwaggerRouter() http.Handler {
+	// использовать гайд отсюда:
+	// https://youtu.be/87au30fl5e4?t=1376
+	return nil
 }

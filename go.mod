@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/oapi-codegen/runtime v1.1.1 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 )

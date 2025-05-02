@@ -2,7 +2,7 @@
 
 OPENAPI_FILE := openapi/openapi.yaml
 OPENAPI_IN_ONE_FILE := openapi/openapi.gen.yaml
-OAPI_CONFIG := configs/oapi-codegen.yaml
+OAPI_CONFIG := openapi/oapi-codegen.config.yaml
 OAPI_PKG := github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 
 # === PUBLIC COMMANDS ===
