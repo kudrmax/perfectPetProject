@@ -22,6 +22,7 @@ func main() {
 
 	log.Println("Server started at http://localhost:8080")
 	log.Println("API: http://localhost:8080/api/1/tweets")
+	log.Println("Feed: http://localhost:8080/api/1/tweets/feed")
 	log.Println("OpenAPI docs at http://localhost:8080/docs/openapi")
 	if err := http.ListenAndServe(":8080", rootRouter); err != nil {
 		log.Fatalf("❌ server exited with error: %v", err)

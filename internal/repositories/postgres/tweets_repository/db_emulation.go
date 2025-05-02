@@ -5,7 +5,9 @@ import "github.com/kudrmax/perfectPetProject/internal/models"
 type DbEmulation map[int]models.Tweet
 
 func NewDbEmulation() DbEmulation {
-	return make(DbEmulation)
+	db := make(DbEmulation)
+	db.addDummyData()
+	return db
 }
 
 func (db *DbEmulation) Create(post *models.Tweet) *models.Tweet {
@@ -39,4 +41,10 @@ func (db *DbEmulation) getMaxId() int {
 	}
 
 	return maxId
+}
+
+func (db *DbEmulation) addDummyData() *DbEmulation {
+	db.Create(&models.Tweet{Id: 1, Text: "First tweet"})
+	db.Create(&models.Tweet{Id: 2, Text: "Second tweet"})
+	return db
 }
