@@ -2,10 +2,11 @@ package tweets_repository
 
 import (
 	"github.com/kudrmax/perfectPetProject/internal/models"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/db_emulation"
 )
 
 type Repository struct {
-	db DbEmulation
+	db db_emulation.DbEmulation[models.Tweet]
 }
 
 func NewRepository() *Repository {
@@ -18,8 +19,8 @@ func (r *Repository) GetAll() []*models.Tweet {
 	return r.db.GetAll()
 }
 
-func (r *Repository) Create(post *models.Tweet) (*models.Tweet, error) {
-	post = r.db.Create(post)
+func (r *Repository) Create(tweet *models.Tweet) (*models.Tweet, error) {
+	tweet = r.db.Create(tweet)
 
-	return post, nil
+	return tweet, nil
 }
