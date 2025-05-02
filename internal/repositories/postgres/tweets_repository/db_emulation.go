@@ -1,50 +1,17 @@
 package tweets_repository
 
-import "github.com/kudrmax/perfectPetProject/internal/models"
+import (
+	"github.com/kudrmax/perfectPetProject/internal/models"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/db_emulation"
+)
 
-type DbEmulation map[int]models.Tweet
-
-func NewDbEmulation() DbEmulation {
-	db := make(DbEmulation)
-	db.addDummyData()
+func NewDbEmulation() db_emulation.DbEmulation[models.Tweet] {
+	db := db_emulation.NewDbEmulation[models.Tweet]()
+	addDummyData(&db)
 	return db
 }
 
-func (db *DbEmulation) Create(post *models.Tweet) *models.Tweet {
-	newId := db.getNewId()
-	post.Id = newId
-
-	(*db)[newId] = *post
-
-	return post
-}
-
-func (db *DbEmulation) GetAll() []*models.Tweet {
-	out := make([]*models.Tweet, 0, len(*db))
-
-	for _, post := range *db {
-		out = append(out, &post)
-	}
-
-	return out
-}
-
-func (db *DbEmulation) getNewId() int {
-	return db.getMaxId() + 1
-}
-
-func (db *DbEmulation) getMaxId() int {
-	maxId := 0
-
-	for id := range *db {
-		maxId = max(maxId, id)
-	}
-
-	return maxId
-}
-
-func (db *DbEmulation) addDummyData() *DbEmulation {
+func addDummyData(db *db_emulation.DbEmulation[models.Tweet]) {
 	db.Create(&models.Tweet{Id: 1, Text: "First tweet"})
 	db.Create(&models.Tweet{Id: 2, Text: "Second tweet"})
-	return db
 }
