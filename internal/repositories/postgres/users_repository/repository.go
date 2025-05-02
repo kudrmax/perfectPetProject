@@ -8,7 +8,7 @@ func NewRepository() *Repository {
 	return &Repository{}
 }
 
-func (r *Repository) GetById(id int64) *models.User {
+func (r *Repository) GetById(id int) *models.User {
 	return &models.User{}
 }
 
@@ -16,6 +16,6 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 	return nil, nil
 }
 
-func (r *Repository) Delete(id int64) error {
+func (r *Repository) Delete(id int) error {
 	return nil
 }

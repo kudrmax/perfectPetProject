@@ -24,6 +24,6 @@ func (r *Repository) Create(post *models.Post) (*models.Post, error) {
 	return post, nil
 }
 
-func (r *Repository) Delete(id int64) error {
+func (r *Repository) Delete(id int) error {
 	return nil
 }

@@ -10,7 +10,7 @@ func NewDbEmulation() DbEmulation {
 
 func (db *DbEmulation) CreatePost(post *models.Post) *models.Post {
 	newId := db.getNewId()
-	post.Id = int64(newId)
+	post.Id = newId
 
 	(*db)[newId] = *post
 

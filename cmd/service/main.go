@@ -6,10 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mvrilo/go-redoc"
-	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 
-	"github.com/kudrmax/perfectPetProject/internal/api"
-	"github.com/kudrmax/perfectPetProject/internal/handlers"
+	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
+	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/posts_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/posts"
@@ -29,11 +28,6 @@ func main() {
 }
 
 func getApiRouter() http.Handler {
-	swagger, err := api.GetSwagger()
-	if err != nil {
-		log.Fatalf("❌ failed to load swagger: %v", err)
-	}
-	swagger.Servers = nil
 
 	userRepository := users_repository.NewRepository()
 	postRepository := posts_repository.NewRepository()
@@ -41,11 +35,14 @@ func getApiRouter() http.Handler {
 		postRepository,
 		userRepository,
 	)
-	handler := handlers.NewHandler(postService)
+	handler := myHttp.NewHandler(postService)
 
 	router := chi.NewRouter()
-	router.Use(nethttpmiddleware.OapiRequestValidator(swagger)) // валидация API
-	router.Mount("/", api.Handler(handler))
+	server := api.NewStrictHandler(handler, nil)
+
+	//router.Use(nethttpmiddleware.OapiRequestValidator(swagger)) // валидация API
+	//router.Mount("/", api.Handler(handler))
+	router.Mount("/", api.Handler(server))
 
 	return router
 }

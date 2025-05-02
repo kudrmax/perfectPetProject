@@ -1,0 +1,8 @@
+# дока: https://github.com/oapi-codegen/oapi-codegen
+
+package: api
+output: internal/handlers/http/api/api.gen.go
+generate:
+  chi-server: true
+  strict-server: true
+  models: true
