@@ -9,6 +9,6 @@ get:
           schema:
             type: array
             items:
-              $ref: "../../components/schemas/posts/post.yaml#/Post"
+              $ref: "../../components/schemas/tweets/tweet.yaml#/Tweet"
     500:
       $ref: "../../components/responses/common.yaml#/InternalError"

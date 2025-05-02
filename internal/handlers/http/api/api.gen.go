@@ -14,15 +14,15 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
-// Post defines model for Post.
-type Post struct {
+// Tweet defines model for Tweet.
+type Tweet struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Id        int       `json:"id"`
 	Text      string    `json:"text"`
 }
 
-// PostCreate defines model for PostCreate.
-type PostCreate struct {
+// TweetCreate defines model for TweetCreate.
+type TweetCreate struct {
 	Text string `json:"text"`
 }
 
@@ -36,16 +36,16 @@ type InternalError struct {
 	Error string `json:"error"`
 }
 
-// CreatePostJSONRequestBody defines body for CreatePost for application/json ContentType.
-type CreatePostJSONRequestBody = PostCreate
+// CreateTweetJSONRequestBody defines body for CreateTweet for application/json ContentType.
+type CreateTweetJSONRequestBody = TweetCreate
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Создать новый пост
-	// (POST /api/1/posts/create_post)
-	CreatePost(w http.ResponseWriter, r *http.Request)
+	// (POST /api/1/tweets/create_post)
+	CreateTweet(w http.ResponseWriter, r *http.Request)
 	// Получить ленту постов
-	// (GET /api/1/posts/feed)
+	// (GET /api/1/tweets/feed)
 	GetFeed(w http.ResponseWriter, r *http.Request)
 }
 
@@ -54,13 +54,13 @@ type ServerInterface interface {
 type Unimplemented struct{}
 
 // Создать новый пост
-// (POST /api/1/posts/create_post)
-func (_ Unimplemented) CreatePost(w http.ResponseWriter, r *http.Request) {
+// (POST /api/1/tweets/create_post)
+func (_ Unimplemented) CreateTweet(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Получить ленту постов
-// (GET /api/1/posts/feed)
+// (GET /api/1/tweets/feed)
 func (_ Unimplemented) GetFeed(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
@@ -74,11 +74,11 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// CreatePost operation middleware
-func (siw *ServerInterfaceWrapper) CreatePost(w http.ResponseWriter, r *http.Request) {
+// CreateTweet operation middleware
+func (siw *ServerInterfaceWrapper) CreateTweet(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.CreatePost(w, r)
+		siw.Handler.CreateTweet(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -216,10 +216,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/api/1/posts/create_post", wrapper.CreatePost)
+		r.Post(options.BaseURL+"/api/1/tweets/create_post", wrapper.CreateTweet)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/1/posts/feed", wrapper.GetFeed)
+		r.Get(options.BaseURL+"/api/1/tweets/feed", wrapper.GetFeed)
 	})
 
 	return r
@@ -233,35 +233,35 @@ type InternalErrorJSONResponse struct {
 	Error string `json:"error"`
 }
 
-type CreatePostRequestObject struct {
-	Body *CreatePostJSONRequestBody
+type CreateTweetRequestObject struct {
+	Body *CreateTweetJSONRequestBody
 }
 
-type CreatePostResponseObject interface {
-	VisitCreatePostResponse(w http.ResponseWriter) error
+type CreateTweetResponseObject interface {
+	VisitCreateTweetResponse(w http.ResponseWriter) error
 }
 
-type CreatePost201JSONResponse Post
+type CreateTweet201JSONResponse Tweet
 
-func (response CreatePost201JSONResponse) VisitCreatePostResponse(w http.ResponseWriter) error {
+func (response CreateTweet201JSONResponse) VisitCreateTweetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreatePost400JSONResponse struct{ BadRequestJSONResponse }
+type CreateTweet400JSONResponse struct{ BadRequestJSONResponse }
 
-func (response CreatePost400JSONResponse) VisitCreatePostResponse(w http.ResponseWriter) error {
+func (response CreateTweet400JSONResponse) VisitCreateTweetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreatePost500JSONResponse struct{ InternalErrorJSONResponse }
+type CreateTweet500JSONResponse struct{ InternalErrorJSONResponse }
 
-func (response CreatePost500JSONResponse) VisitCreatePostResponse(w http.ResponseWriter) error {
+func (response CreateTweet500JSONResponse) VisitCreateTweetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -275,7 +275,7 @@ type GetFeedResponseObject interface {
 	VisitGetFeedResponse(w http.ResponseWriter) error
 }
 
-type GetFeed200JSONResponse []Post
+type GetFeed200JSONResponse []Tweet
 
 func (response GetFeed200JSONResponse) VisitGetFeedResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -296,10 +296,10 @@ func (response GetFeed500JSONResponse) VisitGetFeedResponse(w http.ResponseWrite
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Создать новый пост
-	// (POST /api/1/posts/create_post)
-	CreatePost(ctx context.Context, request CreatePostRequestObject) (CreatePostResponseObject, error)
+	// (POST /api/1/tweets/create_post)
+	CreateTweet(ctx context.Context, request CreateTweetRequestObject) (CreateTweetResponseObject, error)
 	// Получить ленту постов
-	// (GET /api/1/posts/feed)
+	// (GET /api/1/tweets/feed)
 	GetFeed(ctx context.Context, request GetFeedRequestObject) (GetFeedResponseObject, error)
 }
 
@@ -332,11 +332,11 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// CreatePost operation middleware
-func (sh *strictHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
-	var request CreatePostRequestObject
+// CreateTweet operation middleware
+func (sh *strictHandler) CreateTweet(w http.ResponseWriter, r *http.Request) {
+	var request CreateTweetRequestObject
 
-	var body CreatePostJSONRequestBody
+	var body CreateTweetJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -344,18 +344,18 @@ func (sh *strictHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.CreatePost(ctx, request.(CreatePostRequestObject))
+		return sh.ssi.CreateTweet(ctx, request.(CreateTweetRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "CreatePost")
+		handler = middleware(handler, "CreateTweet")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(CreatePostResponseObject); ok {
-		if err := validResponse.VisitCreatePostResponse(w); err != nil {
+	} else if validResponse, ok := response.(CreateTweetResponseObject); ok {
+		if err := validResponse.VisitCreateTweetResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

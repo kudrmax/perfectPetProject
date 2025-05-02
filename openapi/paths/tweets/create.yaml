@@ -1,13 +1,13 @@
 post:
   summary: "Создать новый пост"
-  operationId: "createPost"
+  operationId: "createTweet"
 
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/posts/post_create.yaml#/PostCreate"
+          $ref: "../../components/schemas/tweets/tweet_create.yaml#/TweetCreate"
         examples:
           good:
             summary: "Good request body"
@@ -24,7 +24,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../../components/schemas/posts/post.yaml#/Post"
+            $ref: "../../components/schemas/tweets/tweet.yaml#/Tweet"
     400:
       $ref: "../../components/responses/common.yaml#/BadRequest"
     500:

@@ -5,8 +5,8 @@ import (
 )
 
 type postService interface {
-	GetAllPosts() []*models.Post
-	CreatePost(text string, userId int) (*models.Post, error)
+	GetAll() []*models.Tweet
+	Create(text string, userId int) (*models.Tweet, error)
 }
 
 type Handler struct {
