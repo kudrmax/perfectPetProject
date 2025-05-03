@@ -29,6 +29,8 @@ paths:
           $ref: '#/components/responses/AuthResponse'
         '409':
           description: Пользователь уже существует
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/1/auth/login:
     post:
       summary: Вход в систему
@@ -44,6 +46,10 @@ paths:
           $ref: '#/components/responses/AuthResponse'
         '401':
           description: Неверный логин или пароль
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/1/tweets/create_post:
     post:
       summary: Создать новый пост
@@ -157,8 +163,32 @@ components:
         application/json:
           schema:
             type: object
+            required:
+              - accessToken
             properties:
               accessToken:
+                type: string
+    InternalError:
+      description: Internal Error (500)
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                type: string
+    NotFoundError:
+      description: Not Found Error (404)
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
                 type: string
     BadRequest:
       description: Bad request (400)
@@ -173,23 +203,3 @@ components:
                 type: string
     Unauthorized:
       description: Unauthorized (401)
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - error
-            properties:
-              error:
-                type: string
-    InternalError:
-      description: Internal Error (500)
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - error
-            properties:
-              error:
-                type: string

@@ -45,7 +45,7 @@ type TweetCreate struct {
 
 // AuthResponse defines model for AuthResponse.
 type AuthResponse struct {
-	AccessToken *string `json:"accessToken,omitempty"`
+	AccessToken string `json:"accessToken"`
 }
 
 // BadRequest defines model for BadRequest.
@@ -58,8 +58,8 @@ type InternalError struct {
 	Error string `json:"error"`
 }
 
-// Unauthorized defines model for Unauthorized.
-type Unauthorized struct {
+// NotFoundError defines model for NotFoundError.
+type NotFoundError struct {
 	Error string `json:"error"`
 }
 
@@ -329,7 +329,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 }
 
 type AuthResponseJSONResponse struct {
-	AccessToken *string `json:"accessToken,omitempty"`
+	AccessToken string `json:"accessToken"`
 }
 
 type BadRequestJSONResponse struct {
@@ -340,8 +340,11 @@ type InternalErrorJSONResponse struct {
 	Error string `json:"error"`
 }
 
-type UnauthorizedJSONResponse struct {
+type NotFoundErrorJSONResponse struct {
 	Error string `json:"error"`
+}
+
+type UnauthorizedResponse struct {
 }
 
 type LoginUserRequestObject struct {
@@ -369,6 +372,24 @@ func (response LoginUser401Response) VisitLoginUserResponse(w http.ResponseWrite
 	return nil
 }
 
+type LoginUser404JSONResponse struct{ NotFoundErrorJSONResponse }
+
+func (response LoginUser404JSONResponse) VisitLoginUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type LoginUser500JSONResponse struct{ InternalErrorJSONResponse }
+
+func (response LoginUser500JSONResponse) VisitLoginUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type RegisterUserRequestObject struct {
 	Body *RegisterUserJSONRequestBody
 }
@@ -392,6 +413,15 @@ type RegisterUser409Response struct {
 func (response RegisterUser409Response) VisitRegisterUserResponse(w http.ResponseWriter) error {
 	w.WriteHeader(409)
 	return nil
+}
+
+type RegisterUser500JSONResponse struct{ InternalErrorJSONResponse }
+
+func (response RegisterUser500JSONResponse) VisitRegisterUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type CreateTweetRequestObject struct {
@@ -420,13 +450,11 @@ func (response CreateTweet400JSONResponse) VisitCreateTweetResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateTweet401JSONResponse struct{ UnauthorizedJSONResponse }
+type CreateTweet401Response = UnauthorizedResponse
 
-func (response CreateTweet401JSONResponse) VisitCreateTweetResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response CreateTweet401Response) VisitCreateTweetResponse(w http.ResponseWriter) error {
 	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type CreateTweet500JSONResponse struct{ InternalErrorJSONResponse }
