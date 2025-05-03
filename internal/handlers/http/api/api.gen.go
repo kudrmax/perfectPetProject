@@ -14,6 +14,23 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
+// LoginRequest defines model for LoginRequest.
+type LoginRequest struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+// RegisterRequest defines model for RegisterRequest.
+type RegisterRequest struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
 // Tweet defines model for Tweet.
 type Tweet struct {
 	CreatedAt time.Time `json:"createdAt"`
@@ -26,6 +43,11 @@ type TweetCreate struct {
 	Text string `json:"text"`
 }
 
+// AuthResponse defines model for AuthResponse.
+type AuthResponse struct {
+	AccessToken *string `json:"accessToken,omitempty"`
+}
+
 // BadRequest defines model for BadRequest.
 type BadRequest struct {
 	Error string `json:"error"`
@@ -36,11 +58,28 @@ type InternalError struct {
 	Error string `json:"error"`
 }
 
+// Unauthorized defines model for Unauthorized.
+type Unauthorized struct {
+	Error string `json:"error"`
+}
+
+// LoginUserJSONRequestBody defines body for LoginUser for application/json ContentType.
+type LoginUserJSONRequestBody = LoginRequest
+
+// RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
+type RegisterUserJSONRequestBody = RegisterRequest
+
 // CreateTweetJSONRequestBody defines body for CreateTweet for application/json ContentType.
 type CreateTweetJSONRequestBody = TweetCreate
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Вход в систему
+	// (POST /api/1/auth/login)
+	LoginUser(w http.ResponseWriter, r *http.Request)
+	// Регистрация нового пользователя
+	// (POST /api/1/auth/register)
+	RegisterUser(w http.ResponseWriter, r *http.Request)
 	// Создать новый пост
 	// (POST /api/1/tweets/create_post)
 	CreateTweet(w http.ResponseWriter, r *http.Request)
@@ -52,6 +91,18 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// Вход в систему
+// (POST /api/1/auth/login)
+func (_ Unimplemented) LoginUser(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Регистрация нового пользователя
+// (POST /api/1/auth/register)
+func (_ Unimplemented) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // Создать новый пост
 // (POST /api/1/tweets/create_post)
@@ -74,8 +125,54 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
+// LoginUser operation middleware
+func (siw *ServerInterfaceWrapper) LoginUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.LoginUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RegisterUser operation middleware
+func (siw *ServerInterfaceWrapper) RegisterUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RegisterUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // CreateTweet operation middleware
 func (siw *ServerInterfaceWrapper) CreateTweet(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateTweet(w, r)
@@ -216,6 +313,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/api/1/auth/login", wrapper.LoginUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/api/1/auth/register", wrapper.RegisterUser)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/api/1/tweets/create_post", wrapper.CreateTweet)
 	})
 	r.Group(func(r chi.Router) {
@@ -225,12 +328,70 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	return r
 }
 
+type AuthResponseJSONResponse struct {
+	AccessToken *string `json:"accessToken,omitempty"`
+}
+
 type BadRequestJSONResponse struct {
 	Error string `json:"error"`
 }
 
 type InternalErrorJSONResponse struct {
 	Error string `json:"error"`
+}
+
+type UnauthorizedJSONResponse struct {
+	Error string `json:"error"`
+}
+
+type LoginUserRequestObject struct {
+	Body *LoginUserJSONRequestBody
+}
+
+type LoginUserResponseObject interface {
+	VisitLoginUserResponse(w http.ResponseWriter) error
+}
+
+type LoginUser200JSONResponse struct{ AuthResponseJSONResponse }
+
+func (response LoginUser200JSONResponse) VisitLoginUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type LoginUser401Response struct {
+}
+
+func (response LoginUser401Response) VisitLoginUserResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type RegisterUserRequestObject struct {
+	Body *RegisterUserJSONRequestBody
+}
+
+type RegisterUserResponseObject interface {
+	VisitRegisterUserResponse(w http.ResponseWriter) error
+}
+
+type RegisterUser201JSONResponse struct{ AuthResponseJSONResponse }
+
+func (response RegisterUser201JSONResponse) VisitRegisterUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type RegisterUser409Response struct {
+}
+
+func (response RegisterUser409Response) VisitRegisterUserResponse(w http.ResponseWriter) error {
+	w.WriteHeader(409)
+	return nil
 }
 
 type CreateTweetRequestObject struct {
@@ -255,6 +416,15 @@ type CreateTweet400JSONResponse struct{ BadRequestJSONResponse }
 func (response CreateTweet400JSONResponse) VisitCreateTweetResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateTweet401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response CreateTweet401JSONResponse) VisitCreateTweetResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -295,6 +465,12 @@ func (response GetFeed500JSONResponse) VisitGetFeedResponse(w http.ResponseWrite
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Вход в систему
+	// (POST /api/1/auth/login)
+	LoginUser(ctx context.Context, request LoginUserRequestObject) (LoginUserResponseObject, error)
+	// Регистрация нового пользователя
+	// (POST /api/1/auth/register)
+	RegisterUser(ctx context.Context, request RegisterUserRequestObject) (RegisterUserResponseObject, error)
 	// Создать новый пост
 	// (POST /api/1/tweets/create_post)
 	CreateTweet(ctx context.Context, request CreateTweetRequestObject) (CreateTweetResponseObject, error)
@@ -330,6 +506,68 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// LoginUser operation middleware
+func (sh *strictHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	var request LoginUserRequestObject
+
+	var body LoginUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.LoginUser(ctx, request.(LoginUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "LoginUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LoginUserResponseObject); ok {
+		if err := validResponse.VisitLoginUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RegisterUser operation middleware
+func (sh *strictHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	var request RegisterUserRequestObject
+
+	var body RegisterUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RegisterUser(ctx, request.(RegisterUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RegisterUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RegisterUserResponseObject); ok {
+		if err := validResponse.VisitRegisterUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // CreateTweet operation middleware
