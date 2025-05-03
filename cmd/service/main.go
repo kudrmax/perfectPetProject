@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mvrilo/go-redoc"
@@ -11,7 +12,11 @@ import (
 	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
+	"github.com/kudrmax/perfectPetProject/internal/services/auth"
+	"github.com/kudrmax/perfectPetProject/internal/services/jwt_provider"
+	"github.com/kudrmax/perfectPetProject/internal/services/password_hasher"
 	"github.com/kudrmax/perfectPetProject/internal/services/tweets"
+	"github.com/kudrmax/perfectPetProject/internal/services/users"
 )
 
 func main() {
@@ -30,11 +35,36 @@ func main() {
 }
 
 func getApiRouter() http.Handler {
-	tweetService := tweets.NewService(
-		tweets_repository.NewRepository(),
-		users_repository.NewRepository(),
+	// config
+	jwtTokenDuration := time.Minute * 15
+	jwtSecret := "super-secret"
+
+	// repositories
+
+	tweetRepository := tweets_repository.NewRepository()
+	userRepository := users_repository.NewRepository()
+
+	// services
+
+	tweetService := tweets.NewService(tweetRepository)
+	userService := users.NewService(userRepository)
+	jwtProviderService := jwt_provider.NewService(jwtSecret, jwtTokenDuration)
+	passwordCheckerService := password_hasher.NewService()
+
+	authService := auth.NewService(
+		userService,
+		jwtProviderService,
+		passwordCheckerService,
 	)
-	handler := myHttp.NewHandler(tweetService)
+	_ = authService
+
+	// handlers
+
+	handler := myHttp.NewHandler(
+		tweetService,
+	)
+
+	// routers
 
 	router := chi.NewRouter()
 	server := api.NewStrictHandler(handler, nil)

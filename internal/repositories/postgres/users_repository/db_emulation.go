@@ -12,6 +12,6 @@ func NewDbEmulation() db_emulation.DbEmulation[models.User] {
 }
 
 func addDummyData(db *db_emulation.DbEmulation[models.User]) {
-	db.Create(&models.User{Id: 1, Name: "Max"})
-	db.Create(&models.User{Id: 2, Name: "Elina"})
+	db.Create(&models.User{Id: 1, Name: "Max", Username: "kudrmax"})
+	db.Create(&models.User{Id: 2, Name: "Elina", Username: "elina_chinkina"})
 }

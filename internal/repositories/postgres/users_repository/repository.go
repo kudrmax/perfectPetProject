@@ -15,10 +15,14 @@ func NewRepository() *Repository {
 	}
 }
 
-func (r *Repository) GetById(id int) *models.User {
-	user := r.db.GetById(id)
+func (r *Repository) GetByUsername(username string) *models.User {
+	for _, user := range r.db {
+		if user.Username == username {
+			return &user
+		}
+	}
 
-	return user
+	return nil
 }
 
 func (r *Repository) Create(user *models.User) (*models.User, error) {
