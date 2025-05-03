@@ -1,0 +1,14 @@
+post:
+  summary: Регистрация нового пользователя
+  operationId: registerUser
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/auth/register.yaml#/RegisterRequest"
+  responses:
+    201:
+      $ref: "../../components/responses/common.yaml#/AuthResponse"
+    409:
+      description: Пользователь уже существует

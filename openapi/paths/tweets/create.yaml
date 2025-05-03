@@ -27,5 +27,7 @@ post:
             $ref: "../../components/schemas/tweets/tweet.yaml#/Tweet"
     400:
       $ref: "../../components/responses/common.yaml#/BadRequest"
+    401:
+      $ref: "../../components/responses/common.yaml#/Unauthorized"
     500:
       $ref: "../../components/responses/common.yaml#/InternalError"

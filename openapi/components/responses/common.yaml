@@ -20,4 +20,23 @@ InternalError:
         properties:
           error:
             type: string
-
+AuthResponse:
+  description: "Успешная регистрация"
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          accessToken:
+            type: string
+Unauthorized:
+  description: "Unauthorized (401)"
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - error
+        properties:
+          error:
+            type: string
