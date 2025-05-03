@@ -10,7 +10,9 @@ type Repository struct {
 }
 
 func NewRepository() *Repository {
-	return &Repository{}
+	return &Repository{
+		db: NewDbEmulation[models.User](),
+	}
 }
 
 func (r *Repository) GetById(id int) *models.User {
