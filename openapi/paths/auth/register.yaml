@@ -12,3 +12,5 @@ post:
       $ref: "../../components/responses/common.yaml#/AuthResponse"
     409:
       description: Пользователь уже существует
+    500:
+      $ref: "../../components/responses/common.yaml#/InternalError"
