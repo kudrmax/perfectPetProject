@@ -56,12 +56,12 @@ func getApiRouter() http.Handler {
 		jwtProviderService,
 		passwordCheckerService,
 	)
-	_ = authService
 
 	// handlers
 
 	handler := myHttp.NewHandler(
 		tweetService,
+		authService,
 	)
 
 	// routers
