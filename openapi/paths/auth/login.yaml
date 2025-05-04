@@ -1,6 +1,7 @@
 post:
   summary: Вход в систему
   operationId: loginUser
+  security: [ ]
   requestBody:
     required: true
     content:

@@ -1,6 +1,7 @@
 post:
   summary: Регистрация нового пользователя
   operationId: registerUser
+  security: [ ]
   requestBody:
     required: true
     content:

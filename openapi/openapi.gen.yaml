@@ -18,6 +18,7 @@ paths:
     post:
       summary: Регистрация нового пользователя
       operationId: registerUser
+      security: []
       requestBody:
         required: true
         content:
@@ -35,6 +36,7 @@ paths:
     post:
       summary: Вход в систему
       operationId: loginUser
+      security: []
       requestBody:
         required: true
         content:
