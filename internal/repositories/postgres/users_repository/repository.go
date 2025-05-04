@@ -5,6 +5,10 @@ import (
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/db_emulation"
 )
 
+var SetIdFunc = func(user *models.User, id int) {
+	user.Id = id
+}
+
 type Repository struct {
 	db db_emulation.DbEmulation[models.User]
 }
@@ -26,7 +30,7 @@ func (r *Repository) GetByUsername(username string) *models.User {
 }
 
 func (r *Repository) Create(user *models.User) (*models.User, error) {
-	user = r.db.Create(user)
+	user = r.db.Create(user, SetIdFunc)
 
 	return user, nil
 }

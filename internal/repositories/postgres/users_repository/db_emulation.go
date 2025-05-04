@@ -16,8 +16,11 @@ func addDummyData(db *db_emulation.DbEmulation[models.User]) {
 	passwordHasher := password_hasher.NewService()
 
 	passwordHash, _ := passwordHasher.GenerateHashPassword("kudrmax")
-	db.Create(&models.User{Id: 1, Name: "Max", Username: "kudrmax", PasswordHash: passwordHash})
+	db.Create(&models.User{Id: 1, Name: "Max", Username: "kudrmax", PasswordHash: passwordHash}, SetIdFunc)
 
 	passwordHash, _ = passwordHasher.GenerateHashPassword("elina")
-	db.Create(&models.User{Id: 2, Name: "Elina", Username: "elina"})
+	db.Create(&models.User{Id: 2, Name: "Elina", Username: "elina", PasswordHash: passwordHash}, SetIdFunc)
+
+	passwordHash, _ = passwordHasher.GenerateHashPassword("string")
+	db.Create(&models.User{Id: 3, Name: "string", Username: "string", PasswordHash: passwordHash}, SetIdFunc)
 }
