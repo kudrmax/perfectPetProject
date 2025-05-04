@@ -13,6 +13,7 @@ type (
 	authService interface {
 		Register(name, username, password string) (accessToken string, err error)
 		Login(username, password string) (accessToken string, err error)
+		ValidateTokenAndGetUserId(token string) (userId int, err error)
 	}
 )
 
