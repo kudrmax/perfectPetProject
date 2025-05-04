@@ -1,0 +1,22 @@
+meta {
+  name: Вход в систему
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/1/auth/login
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "username": "kudrmax",
+    "password": "kudrmax"
+  }
+}

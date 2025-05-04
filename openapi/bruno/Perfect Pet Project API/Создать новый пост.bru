@@ -1,0 +1,21 @@
+meta {
+  name: Создать новый пост
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/1/tweets/create_post
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NDYzNjU1ODYsImlhdCI6MTc0NjM2NDY4Nn0.niJbta21_tI0G6cu5YSV9FBwUPsWBOwfUh3BVmN81uE
+}
+
+body:json {
+  {
+    "text": "Tmp"
+  }
+}
