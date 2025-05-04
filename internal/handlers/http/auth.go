@@ -51,6 +51,12 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 	}, nil
 }
 
+func (h *Handler) LogoutUser(ctx context.Context, request api.LogoutUserRequestObject) (api.LogoutUserResponseObject, error) {
+	// TODO удалять userId из контекста
+	// TODO делать токен невалидным
+	return api.LogoutUser204Response{}, nil
+}
+
 func (h *Handler) AuthMiddleware(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 	if input.SecuritySchemeName != "BearerAuth" {
 		return fmt.Errorf("unsupported security scheme: %s", input.SecuritySchemeName)

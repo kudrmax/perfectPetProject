@@ -1,5 +1,5 @@
 post:
-  summary: Вход в систему
+  summary: Вход
   operationId: loginUser
   security: [ ]
   requestBody:

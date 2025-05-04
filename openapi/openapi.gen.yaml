@@ -34,7 +34,7 @@ paths:
           $ref: '#/components/responses/InternalError'
   /api/1/auth/login:
     post:
-      summary: Вход в систему
+      summary: Вход
       operationId: loginUser
       security: []
       requestBody:
@@ -50,6 +50,17 @@ paths:
           description: Неверный логин или пароль
         '404':
           $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/1/auth/logout:
+    post:
+      summary: Выход
+      operationId: logoutUser
+      responses:
+        '204':
+          description: Выход выполнен успешно
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalError'
   /api/1/tweets/create_post:
@@ -192,6 +203,8 @@ components:
             properties:
               error:
                 type: string
+    Unauthorized:
+      description: Unauthorized (401)
     BadRequest:
       description: Bad request (400)
       content:
@@ -203,5 +216,3 @@ components:
             properties:
               error:
                 type: string
-    Unauthorized:
-      description: Unauthorized (401)

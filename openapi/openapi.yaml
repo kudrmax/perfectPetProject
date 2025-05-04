@@ -20,6 +20,8 @@ paths:
     $ref: 'paths/auth/register.yaml'
   /api/1/auth/login:
     $ref: 'paths/auth/login.yaml'
+  /api/1/auth/logout:
+    $ref: 'paths/auth/logout.yaml'
   /api/1/tweets/create_post:
     $ref: 'paths/tweets/create.yaml'
   /api/1/tweets/feed:
