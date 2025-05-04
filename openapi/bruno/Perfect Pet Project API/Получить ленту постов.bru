@@ -1,0 +1,11 @@
+meta {
+  name: Получить ленту постов
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/1/tweets/feed
+  body: none
+  auth: inherit
+}

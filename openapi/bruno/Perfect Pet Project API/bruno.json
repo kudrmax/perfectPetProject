@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Perfect Pet Project API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
