@@ -5,10 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
 	"github.com/mvrilo/go-redoc"
-	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 
 	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
 	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
@@ -68,16 +66,17 @@ func getApiRouter() http.Handler {
 
 	// routers
 
-	swagger, _ := api.GetSwagger()
+	//swagger, _ := api.GetSwagger()
 
 	router := chi.NewRouter()
 	server := api.NewStrictHandler(handler, nil)
 
-	router.Use(nethttpmiddleware.OapiRequestValidatorWithOptions(swagger, &nethttpmiddleware.Options{
-		Options: openapi3filter.Options{
-			AuthenticationFunc: handler.AuthMiddleware,
-		},
-	}))
+	//router.Use(nethttpmiddleware.OapiRequestValidatorWithOptions(swagger, &nethttpmiddleware.Options{
+	//	Options: openapi3filter.Options{
+	//		AuthenticationFunc: handler.AuthMiddleware,
+	//	},
+	//}))
+	router.Use(myHttp.AuthMiddleware2(authService))
 	router.Mount("/", api.Handler(server))
 
 	return router

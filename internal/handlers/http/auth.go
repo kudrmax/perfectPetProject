@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -54,7 +55,32 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 func (h *Handler) LogoutUser(ctx context.Context, request api.LogoutUserRequestObject) (api.LogoutUserResponseObject, error) {
 	// TODO удалять userId из контекста
 	// TODO делать токен невалидным
+	userId := ctx.Value("userId")
+	_ = userId
 	return api.LogoutUser204Response{}, nil
+}
+
+func AuthMiddleware2(authService *auth.Service) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+				http.Error(w, "missing or invalid Authorization header", http.StatusUnauthorized)
+				return
+			}
+
+			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+			userID, err := authService.ValidateTokenAndGetUserId(tokenStr)
+			if err != nil {
+				http.Error(w, "invalid or expired token", http.StatusUnauthorized)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), "userId", userID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
 func (h *Handler) AuthMiddleware(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
@@ -73,6 +99,7 @@ func (h *Handler) AuthMiddleware(ctx context.Context, input *openapi3filter.Auth
 
 	ctxWithUser := context.WithValue(ctx, "userId", userId)
 	input.RequestValidationInput.Request = input.RequestValidationInput.Request.WithContext(ctxWithUser)
+	ctx = ctxWithUser
 
 	return nil
 }
