@@ -31,8 +31,11 @@ func main() {
 
 func getApiRouter() http.Handler {
 	// config
-	jwtTokenDuration := time.Minute * 15
-	jwtSecret := "super-secret"
+	// TODO использовать какую-то библиотеку для настройки конфига
+	const (
+		jwtTokenDuration = time.Minute * 15
+		jwtSecret        = "super-secret"
+	)
 
 	// repositories
 
