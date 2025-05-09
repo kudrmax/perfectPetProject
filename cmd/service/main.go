@@ -7,8 +7,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/kudrmax/perfectPetProject/internal/handlers/newhttp/create_tweet"
-	"github.com/kudrmax/perfectPetProject/internal/handlers/newhttp/get_feed"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth/login"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth/register"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed"
+	"github.com/kudrmax/perfectPetProject/internal/http/middlewares/auth_middleware"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
@@ -54,15 +57,16 @@ func getApiRouter() http.Handler {
 		jwtProviderService,
 		passwordCheckerService,
 	)
-
-	_ = tweetService
-	_ = authService
-
+	
 	// handlers
 
 	handlerMap := map[string]http.HandlerFunc{
-		"POST /api/1/tweets/create_post": create_tweet.NewHandler(tweetService).Handle,
-		"GET /api/1/tweets/feed":         get_feed.NewHandler(tweetService).Handle,
+		"POST /api/1/auth/register": register.NewHandler(authService).Handle,
+		"POST /api/1/auth/login":    login.NewHandler(authService).Handle,
+		"POST /api/1/tweets/create_post": auth_middleware.NewHandler(authService).AuthMiddleware(
+			create_tweet.NewHandler(tweetService).Handle,
+		),
+		"GET /api/1/tweets/feed": get_feed.NewHandler(tweetService).Handle,
 	}
 
 	// routers
