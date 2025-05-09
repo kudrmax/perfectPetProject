@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"strings"
+
+	"github.com/kudrmax/perfectPetProject/internal/http/http_const"
 )
 
 type (
@@ -37,7 +39,7 @@ func (h *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "userId", userId)
+		ctx = context.WithValue(ctx, http_const.UserIdContextKey, userId)
 
 		next(w, r.WithContext(ctx))
 	}
