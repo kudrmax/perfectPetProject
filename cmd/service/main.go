@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
-	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
+	"github.com/kudrmax/perfectPetProject/internal/handlers/newhttp/create_tweet"
+	"github.com/kudrmax/perfectPetProject/internal/handlers/newhttp/get_feed"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
@@ -55,27 +55,22 @@ func getApiRouter() http.Handler {
 		passwordCheckerService,
 	)
 
+	_ = tweetService
+	_ = authService
+
 	// handlers
 
-	handler := myHttp.NewHandler(
-		tweetService,
-		authService,
-	)
+	handlerMap := map[string]http.HandlerFunc{
+		"POST /api/1/tweets/create_post": create_tweet.NewHandler(tweetService).Handle,
+		"GET /api/1/tweets/feed":         get_feed.NewHandler(tweetService).Handle,
+	}
 
 	// routers
 
-	//swagger, _ := api.GetSwagger()
+	mux := http.NewServeMux()
+	for path, handler := range handlerMap {
+		mux.HandleFunc(path, handler)
+	}
 
-	router := chi.NewRouter()
-	server := api.NewStrictHandler(handler, nil)
-
-	//router.Use(nethttpmiddleware.OapiRequestValidatorWithOptions(swagger, &nethttpmiddleware.Options{
-	//	Options: openapi3filter.Options{
-	//		AuthenticationFunc: handler.AuthMiddleware,
-	//	},
-	//}))
-	router.Use(myHttp.AuthMiddleware2(authService))
-	router.Mount("/", api.Handler(server))
-
-	return router
+	return mux
 }
