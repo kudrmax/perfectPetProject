@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/http_common"
+	"github.com/kudrmax/perfectPetProject/internal/http/http_const"
 	"github.com/kudrmax/perfectPetProject/internal/http/http_model"
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
@@ -38,10 +39,13 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	text := tweetCreate.Text
-	userId := 666 // TODO брать ID из context
+	ctx := r.Context()
+	userID := ctx.Value(http_const.UserIdContextKey).(int)
+	if userID == 0 {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+	}
 
-	tweet, err := h.tweetService.Create(text, userId)
+	tweet, err := h.tweetService.Create(tweetCreate.Text, userID)
 	if err != nil {
 		http.Error(w, "failed to create tweet", http.StatusInternalServerError)
 		// TODO log
