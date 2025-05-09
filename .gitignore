@@ -1,3 +1,5 @@
 .idea
 vendor
-openapi/.DS_Store
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
