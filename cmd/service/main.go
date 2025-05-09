@@ -7,8 +7,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
-	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/middlewares/auth_middleware"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
@@ -31,6 +33,7 @@ func main() {
 
 func getApiRouter() http.Handler {
 	// config
+
 	// TODO использовать какую-то библиотеку для настройки конфига
 	const (
 		jwtTokenDuration = time.Minute * 15
@@ -55,27 +58,29 @@ func getApiRouter() http.Handler {
 		passwordCheckerService,
 	)
 
+	// middlewares
+
+	auth_mv := auth_middleware.New(authService).AuthMiddleware
+	// TODO сделать удобное подключение auth middlewares
+	// TODO добавить recover middleware
+	// TODO добавить логирование
+	// TODO добавить разные env
+
 	// handlers
 
-	handler := myHttp.NewHandler(
-		tweetService,
-		authService,
-	)
+	handlerMap := map[string]http.HandlerFunc{
+		"POST /api/1/auth/register": auth_handler.New(authService).Register,
+		"POST /api/1/auth/login":    auth_handler.New(authService).Login,
+		"POST /api/1/tweets/create": auth_mv(create_tweet_handler.New(tweetService).Handle),
+		"GET /api/1/tweets/feed":    get_feed_handler.New(tweetService).Handle,
+	}
 
 	// routers
 
-	//swagger, _ := api.GetSwagger()
+	mux := http.NewServeMux()
+	for path, handler := range handlerMap {
+		mux.HandleFunc(path, handler)
+	}
 
-	router := chi.NewRouter()
-	server := api.NewStrictHandler(handler, nil)
-
-	//router.Use(nethttpmiddleware.OapiRequestValidatorWithOptions(swagger, &nethttpmiddleware.Options{
-	//	Options: openapi3filter.Options{
-	//		AuthenticationFunc: handler.AuthMiddleware,
-	//	},
-	//}))
-	router.Use(myHttp.AuthMiddleware2(authService))
-	router.Mount("/", api.Handler(server))
-
-	return router
+	return mux
 }

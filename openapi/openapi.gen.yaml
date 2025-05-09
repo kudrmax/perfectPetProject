@@ -63,7 +63,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalError'
-  /api/1/tweets/create_post:
+  /api/1/tweets/create:
     post:
       summary: Создать новый пост
       operationId: createTweet
