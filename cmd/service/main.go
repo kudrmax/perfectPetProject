@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth_handler"
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet_handler"
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed_handler"
@@ -21,12 +19,10 @@ import (
 )
 
 func main() {
-	rootRouter := chi.NewRouter()
-
-	rootRouter.Mount("/", getApiRouter())
+	mux := getApiRouter()
 
 	log.Println("Server started at http://localhost:8080")
-	if err := http.ListenAndServe(":8080", rootRouter); err != nil {
+	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatalf("❌ server exited with error: %v", err)
 	}
 }
