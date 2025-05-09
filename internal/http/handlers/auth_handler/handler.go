@@ -1,4 +1,4 @@
-package login
+package auth_handler
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 type (
 	authService interface {
 		Login(username, password string) (accessToken string, err error)
+		Register(name, username, password string) (accessToken string, err error)
 	}
 )
 
@@ -25,7 +26,13 @@ func NewHandler(
 	}
 }
 
-type Request struct {
+type RegisterRequest struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+type LoginRequest struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
 }
@@ -34,12 +41,40 @@ type Response struct {
 	AccessToken string `json:"accessToken"`
 }
 
-func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
-	var body Request
+	var body RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	token, err := h.authService.Register(body.Name, body.Username, body.Password)
+
+	if err != nil {
+		switch err {
+		case auth.UserAlreadyExistsErr:
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(Response{AccessToken: token})
+}
+
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+
+	var body LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return

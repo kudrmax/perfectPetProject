@@ -1,4 +1,4 @@
-package get_feed
+package get_feed_handler
 
 import (
 	"encoding/json"

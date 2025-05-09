@@ -7,10 +7,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth/login"
-	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth/register"
-	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet"
-	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed_handler"
 	"github.com/kudrmax/perfectPetProject/internal/http/middlewares/auth_middleware"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
@@ -34,6 +33,7 @@ func main() {
 
 func getApiRouter() http.Handler {
 	// config
+
 	// TODO использовать какую-то библиотеку для настройки конфига
 	const (
 		jwtTokenDuration = time.Minute * 15
@@ -57,16 +57,16 @@ func getApiRouter() http.Handler {
 		jwtProviderService,
 		passwordCheckerService,
 	)
-	
+
 	// handlers
 
 	handlerMap := map[string]http.HandlerFunc{
-		"POST /api/1/auth/register": register.NewHandler(authService).Handle,
-		"POST /api/1/auth/login":    login.NewHandler(authService).Handle,
+		"POST /api/1/auth/register": auth_handler.NewHandler(authService).Register,
+		"POST /api/1/auth/login":    auth_handler.NewHandler(authService).Login,
 		"POST /api/1/tweets/create_post": auth_middleware.NewHandler(authService).AuthMiddleware(
-			create_tweet.NewHandler(tweetService).Handle,
+			create_tweet_handler.NewHandler(tweetService).Handle,
 		),
-		"GET /api/1/tweets/feed": get_feed.NewHandler(tweetService).Handle,
+		"GET /api/1/tweets/feed": get_feed_handler.NewHandler(tweetService).Handle,
 	}
 
 	// routers

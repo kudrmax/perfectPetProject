@@ -1,4 +1,4 @@
-package create_tweet
+package create_tweet_handler
 
 import (
 	"encoding/json"
