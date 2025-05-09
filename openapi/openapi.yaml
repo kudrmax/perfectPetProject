@@ -13,7 +13,7 @@ servers:
     description: "Локальный сервер для разработки"
 
 security:
-  - BearerAuth: []
+  - BearerAuth: [ ]
 
 paths:
   /api/1/auth/register:
@@ -22,7 +22,7 @@ paths:
     $ref: 'paths/auth/login.yaml'
   /api/1/auth/logout:
     $ref: 'paths/auth/logout.yaml'
-  /api/1/tweets/create_post:
+  /api/1/tweets/create:
     $ref: 'paths/tweets/create.yaml'
   /api/1/tweets/feed:
     $ref: 'paths/tweets/feed.yaml'

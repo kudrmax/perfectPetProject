@@ -1,9 +1,9 @@
 package get_feed_handler
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/http_common"
 	"github.com/kudrmax/perfectPetProject/internal/http/http_model"
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
@@ -18,7 +18,7 @@ type Handler struct {
 	tweetService tweetService
 }
 
-func NewHandler(
+func New(
 	tweetService tweetService,
 ) *Handler {
 	return &Handler{
@@ -34,9 +34,9 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	tweets := h.tweetService.GetAll()
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(convertToDto(tweets))
+	if err := http_common.WriteResponse(w, http.StatusOK, convertToDto(tweets)); err != nil {
+		// TODO log
+	}
 }
 
 func convertToDto(tweets []*models.Tweet) []http_model.Tweet {

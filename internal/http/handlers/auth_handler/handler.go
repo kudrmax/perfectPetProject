@@ -1,9 +1,9 @@
 package auth_handler
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/http_common"
 	"github.com/kudrmax/perfectPetProject/internal/http/http_model"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
 )
@@ -19,7 +19,7 @@ type Handler struct {
 	authService authService
 }
 
-func NewHandler(
+func New(
 	authService authService,
 ) *Handler {
 	return &Handler{
@@ -32,9 +32,9 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
-	var body http_model.RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	body, err := http_common.GetRequestBody[http_model.RegisterRequest](r)
+	if err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
@@ -43,17 +43,19 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case auth.UserAlreadyExistsErr:
-			http.Error(w, err.Error(), http.StatusConflict)
+			http.Error(w, "user already exists", http.StatusConflict)
 			return
 		default:
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			// TODO log
 			return
 		}
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(http_model.AuthResponse{AccessToken: token})
+	err = http_common.WriteResponse(w, http.StatusOK, http_model.AuthResponse{AccessToken: token})
+	if err != nil {
+		// TODO log
+	}
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -61,11 +63,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
-	var body http_model.LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	body, err := http_common.GetRequestBody[http_model.LoginRequest](r)
+	if err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
+
 	token, err := h.authService.Login(body.Username, body.Password)
 
 	if err != nil {
@@ -78,11 +81,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
+			// TODO log
 			return
 		}
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(http_model.AuthResponse{AccessToken: token})
+	err = http_common.WriteResponse(w, http.StatusOK, http_model.AuthResponse{AccessToken: token})
+	if err != nil {
+		// TODO log
+	}
 }

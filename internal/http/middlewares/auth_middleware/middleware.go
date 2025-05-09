@@ -12,19 +12,19 @@ type (
 	}
 )
 
-type Handler struct {
+type Middleware struct {
 	authService authService
 }
 
-func NewHandler(
+func New(
 	authService authService,
-) *Handler {
-	return &Handler{
+) *Middleware {
+	return &Middleware{
 		authService: authService,
 	}
 }
 
-func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+func (h *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenStr := h.extractBearerToken(
 			r.Header.Get("Authorization"),
@@ -43,7 +43,7 @@ func (h *Handler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (h *Handler) extractBearerToken(header string) string {
+func (h *Middleware) extractBearerToken(header string) string {
 	const prefix = "Bearer "
 	if strings.HasPrefix(header, prefix) {
 		return strings.TrimPrefix(header, prefix)

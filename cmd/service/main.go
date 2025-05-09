@@ -58,15 +58,21 @@ func getApiRouter() http.Handler {
 		passwordCheckerService,
 	)
 
+	// middlewares
+
+	auth_mv := auth_middleware.New(authService).AuthMiddleware
+	// TODO сделать удобное подключение auth middlewares
+	// TODO добавить recover middleware
+	// TODO добавить логирование
+	// TODO добавить разные env
+
 	// handlers
 
 	handlerMap := map[string]http.HandlerFunc{
-		"POST /api/1/auth/register": auth_handler.NewHandler(authService).Register,
-		"POST /api/1/auth/login":    auth_handler.NewHandler(authService).Login,
-		"POST /api/1/tweets/create_post": auth_middleware.NewHandler(authService).AuthMiddleware(
-			create_tweet_handler.NewHandler(tweetService).Handle,
-		),
-		"GET /api/1/tweets/feed": get_feed_handler.NewHandler(tweetService).Handle,
+		"POST /api/1/auth/register": auth_handler.New(authService).Register,
+		"POST /api/1/auth/login":    auth_handler.New(authService).Login,
+		"POST /api/1/tweets/create": auth_mv(create_tweet_handler.New(tweetService).Handle),
+		"GET /api/1/tweets/feed":    get_feed_handler.New(tweetService).Handle,
 	}
 
 	// routers
