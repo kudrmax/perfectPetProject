@@ -12,8 +12,24 @@ servers:
   - url: http://localhost:8080
     description: "Локальный сервер для разработки"
 
+security:
+  - BearerAuth: [ ]
+
 paths:
-  /api/1/tweets/create_post:
+  /api/1/auth/register:
+    $ref: 'paths/auth/register.yaml'
+  /api/1/auth/login:
+    $ref: 'paths/auth/login.yaml'
+  /api/1/auth/logout:
+    $ref: 'paths/auth/logout.yaml'
+  /api/1/tweets/create:
     $ref: 'paths/tweets/create.yaml'
   /api/1/tweets/feed:
     $ref: 'paths/tweets/feed.yaml'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

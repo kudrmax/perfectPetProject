@@ -11,8 +11,59 @@ info:
 servers:
   - url: http://localhost:8080
     description: Локальный сервер для разработки
+security:
+  - BearerAuth: []
 paths:
-  /api/1/tweets/create_post:
+  /api/1/auth/register:
+    post:
+      summary: Регистрация нового пользователя
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/AuthResponse'
+        '409':
+          description: Пользователь уже существует
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/1/auth/login:
+    post:
+      summary: Вход
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AuthResponse'
+        '401':
+          description: Неверный логин или пароль
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/1/auth/logout:
+    post:
+      summary: Выход
+      operationId: logoutUser
+      responses:
+        '204':
+          description: Выход выполнен успешно
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/1/tweets/create:
     post:
       summary: Создать новый пост
       operationId: createTweet
@@ -40,12 +91,15 @@ paths:
                 $ref: '#/components/schemas/Tweet'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalError'
   /api/1/tweets/feed:
     get:
       summary: Получить ленту постов
       operationId: getFeed
+      security: []
       responses:
         '200':
           description: Список постов
@@ -58,7 +112,40 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - username
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 1
+        username:
+          type: string
+          minLength: 4
+        password:
+          type: string
+          minLength: 6
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
     TweetCreate:
       type: object
       required:
@@ -83,8 +170,19 @@ components:
           type: string
           format: date-time
   responses:
-    BadRequest:
-      description: Bad request (400)
+    AuthResponse:
+      description: Успешная регистрация
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accessToken
+            properties:
+              accessToken:
+                type: string
+    InternalError:
+      description: Internal Error (500)
       content:
         application/json:
           schema:
@@ -94,8 +192,21 @@ components:
             properties:
               error:
                 type: string
-    InternalError:
-      description: Internal Error (500)
+    NotFoundError:
+      description: Not Found Error (404)
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                type: string
+    Unauthorized:
+      description: Unauthorized (401)
+    BadRequest:
+      description: Bad request (400)
       content:
         application/json:
           schema:

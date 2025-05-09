@@ -11,25 +11,17 @@ type (
 		GetAll() []*models.Tweet
 		Create(tweet *models.Tweet) (*models.Tweet, error)
 	}
-
-	userRepository interface {
-		GetById(id int) *models.User
-		Create(user *models.User) (*models.User, error)
-	}
 )
 
 type Service struct {
 	tweetRepository tweetRepository
-	userRepository  userRepository
 }
 
 func NewService(
 	tweetRepository tweetRepository,
-	userRepository userRepository,
 ) *Service {
 	return &Service{
 		tweetRepository: tweetRepository,
-		userRepository:  userRepository,
 	}
 }
 

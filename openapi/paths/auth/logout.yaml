@@ -1,0 +1,10 @@
+post:
+  summary: Выход
+  operationId: logoutUser
+  responses:
+    204:
+      description: "Выход выполнен успешно"
+    401:
+      $ref: "../../components/responses/common.yaml#/Unauthorized"
+    500:
+      $ref: "../../components/responses/common.yaml#/InternalError"

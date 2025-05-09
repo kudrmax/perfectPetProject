@@ -1,0 +1,19 @@
+post:
+  summary: Вход
+  operationId: loginUser
+  security: [ ]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/auth/login.yaml#/LoginRequest"
+  responses:
+    200:
+      $ref: "../../components/responses/common.yaml#/AuthResponse"
+    401:
+      description: "Неверный логин или пароль"
+    404:
+      $ref: "../../components/responses/common.yaml#/NotFoundError"
+    500:
+      $ref: "../../components/responses/common.yaml#/InternalError"

@@ -12,6 +12,6 @@ func NewDbEmulation() db_emulation.DbEmulation[models.Tweet] {
 }
 
 func addDummyData(db *db_emulation.DbEmulation[models.Tweet]) {
-	db.Create(&models.Tweet{Id: 1, Text: "First tweet"})
-	db.Create(&models.Tweet{Id: 2, Text: "Second tweet"})
+	db.Create(&models.Tweet{Id: 1, Text: "First tweet"}, SetIdFunc)
+	db.Create(&models.Tweet{Id: 2, Text: "Second tweet"}, SetIdFunc)
 }

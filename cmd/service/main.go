@@ -3,69 +3,84 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/mvrilo/go-redoc"
 
-	myHttp "github.com/kudrmax/perfectPetProject/internal/handlers/http"
-	"github.com/kudrmax/perfectPetProject/internal/handlers/http/api"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/auth_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed_handler"
+	"github.com/kudrmax/perfectPetProject/internal/http/middlewares/auth_middleware"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
+	"github.com/kudrmax/perfectPetProject/internal/services/auth"
+	"github.com/kudrmax/perfectPetProject/internal/services/jwt_provider"
+	"github.com/kudrmax/perfectPetProject/internal/services/password_hasher"
 	"github.com/kudrmax/perfectPetProject/internal/services/tweets"
+	"github.com/kudrmax/perfectPetProject/internal/services/users"
 )
 
 func main() {
 	rootRouter := chi.NewRouter()
 
-	rootRouter.Mount("/docs", getRedocRouter())
 	rootRouter.Mount("/", getApiRouter())
 
 	log.Println("Server started at http://localhost:8080")
-	log.Println("API: http://localhost:8080/api/1/tweets")
-	log.Println("Feed: http://localhost:8080/api/1/tweets/feed")
-	log.Println("OpenAPI docs at http://localhost:8080/docs/openapi")
 	if err := http.ListenAndServe(":8080", rootRouter); err != nil {
 		log.Fatalf("❌ server exited with error: %v", err)
 	}
 }
 
 func getApiRouter() http.Handler {
-	tweetService := tweets.NewService(
-		tweets_repository.NewRepository(),
-		users_repository.NewRepository(),
+	// config
+
+	// TODO использовать какую-то библиотеку для настройки конфига
+	const (
+		jwtTokenDuration = time.Minute * 15
+		jwtSecret        = "super-secret"
 	)
-	handler := myHttp.NewHandler(tweetService)
 
-	router := chi.NewRouter()
-	server := api.NewStrictHandler(handler, nil)
+	// repositories
 
-	//router.Use(nethttpmiddleware.OapiRequestValidator(swagger)) // валидация API
-	router.Mount("/", api.Handler(server))
+	tweetRepository := tweets_repository.NewRepository()
+	userRepository := users_repository.NewRepository()
 
-	return router
-}
+	// services
 
-func getRedocRouter() http.Handler {
-	doc := redoc.Redoc{
-		Title:       "API Documentation",
-		Description: "Интерактивная документация для API",
-		SpecFile:    "./openapi/openapi.gen.yaml",
-		SpecPath:    "/docs/openapi.yaml", // относительный путь внутри /docs
-		DocsPath:    "/docs/openapi",      // будет доступен как /docs/openapi
+	tweetService := tweets.NewService(tweetRepository)
+	userService := users.NewService(userRepository)
+	jwtProviderService := jwt_provider.NewService(jwtSecret, jwtTokenDuration)
+	passwordCheckerService := password_hasher.NewService()
+
+	authService := auth.NewService(
+		userService,
+		jwtProviderService,
+		passwordCheckerService,
+	)
+
+	// middlewares
+
+	auth_mv := auth_middleware.New(authService).AuthMiddleware
+	// TODO сделать удобное подключение auth middlewares
+	// TODO добавить recover middleware
+	// TODO добавить логирование
+	// TODO добавить разные env
+
+	// handlers
+
+	handlerMap := map[string]http.HandlerFunc{
+		"POST /api/1/auth/register": auth_handler.New(authService).Register,
+		"POST /api/1/auth/login":    auth_handler.New(authService).Login,
+		"POST /api/1/tweets/create": auth_mv(create_tweet_handler.New(tweetService).Handle),
+		"GET /api/1/tweets/feed":    get_feed_handler.New(tweetService).Handle,
 	}
 
-	router := chi.NewRouter()
+	// routers
 
-	router.Get("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, doc.SpecFile)
-	})
-	router.Get("/openapi", doc.Handler())
+	mux := http.NewServeMux()
+	for path, handler := range handlerMap {
+		mux.HandleFunc(path, handler)
+	}
 
-	return router
-}
-
-func getSwaggerRouter() http.Handler {
-	// использовать гайд отсюда:
-	// https://youtu.be/87au30fl5e4?t=1376
-	return nil
+	return mux
 }

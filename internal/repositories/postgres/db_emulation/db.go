@@ -2,15 +2,18 @@ package db_emulation
 
 type DbEmulation[T any] map[int]T
 
+type SetIdFuncType[T any] func(obj *T, id int)
+
 func NewDbEmulation[T any]() DbEmulation[T] {
 	db := make(DbEmulation[T])
 	return db
 }
 
-func (db *DbEmulation[T]) Create(obj *T) *T {
+func (db *DbEmulation[T]) Create(obj *T, SetIdFunc SetIdFuncType[T]) *T {
 	newId := db.getNewId()
 
 	(*db)[newId] = *obj
+	SetIdFunc(obj, newId)
 
 	return obj
 }
@@ -48,9 +51,9 @@ func (db *DbEmulation[T]) getMaxId() int {
 	return maxId
 }
 
-func (db *DbEmulation[T]) addDummyData(objs []T) *DbEmulation[T] {
+func (db *DbEmulation[T]) addDummyData(objs []T, SetIdFunc SetIdFuncType[T]) *DbEmulation[T] {
 	for _, obj := range objs {
-		db.Create(&obj)
+		db.Create(&obj, SetIdFunc)
 	}
 	return db
 }
