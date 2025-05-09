@@ -3,8 +3,8 @@ package get_feed_handler
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
+	"github.com/kudrmax/perfectPetProject/internal/http/http_model"
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
 
@@ -26,12 +26,6 @@ func NewHandler(
 	}
 }
 
-type Tweet struct {
-	CreatedAt time.Time `json:"createdAt"`
-	Id        int       `json:"id"`
-	Text      string    `json:"text"`
-}
-
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -45,11 +39,11 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(convertToDto(tweets))
 }
 
-func convertToDto(tweets []*models.Tweet) []Tweet {
-	out := make([]Tweet, 0, len(tweets))
+func convertToDto(tweets []*models.Tweet) []http_model.Tweet {
+	out := make([]http_model.Tweet, 0, len(tweets))
 
 	for i := range tweets {
-		out = append(out, Tweet{
+		out = append(out, http_model.Tweet{
 			Id:        tweets[i].Id,
 			Text:      tweets[i].Text,
 			CreatedAt: tweets[i].CreatedAt,

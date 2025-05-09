@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/kudrmax/perfectPetProject/internal/http/http_model"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
 )
 
@@ -26,31 +27,17 @@ func NewHandler(
 	}
 }
 
-type RegisterRequest struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
-
-type LoginRequest struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
-
-type Response struct {
-	AccessToken string `json:"accessToken"`
-}
-
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
-	var body RegisterRequest
+	var body http_model.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+
 	token, err := h.authService.Register(body.Name, body.Username, body.Password)
 
 	if err != nil {
@@ -66,7 +53,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Response{AccessToken: token})
+	json.NewEncoder(w).Encode(http_model.AuthResponse{AccessToken: token})
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +61,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
-	var body LoginRequest
+	var body http_model.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -97,5 +84,5 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Response{AccessToken: token})
+	json.NewEncoder(w).Encode(http_model.AuthResponse{AccessToken: token})
 }
