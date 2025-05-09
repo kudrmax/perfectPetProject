@@ -91,3 +91,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		// TODO log
 	}
 }
+
+func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+	// TODO implement logout
+}
+
+func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
+	// TODO implement refresh
+}

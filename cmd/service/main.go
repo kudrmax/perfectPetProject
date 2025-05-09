@@ -73,6 +73,7 @@ func getApiRouter() http.Handler {
 
 	// routers
 
+	// TODO посмотреть зачем нужны другие роутеры (chi, gin, gorilla/mux)
 	mux := http.NewServeMux()
 	for path, handler := range handlerMap {
 		mux.HandleFunc(path, handler)
