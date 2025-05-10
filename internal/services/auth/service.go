@@ -6,14 +6,7 @@ import (
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
 
-var (
-	UserAlreadyExistsErr    = errors.New("user already exists")
-	UserNotFoundErr         = errors.New("user not found")
-	FailedCreateUserErr     = errors.New("failed to create user")
-	FailedHGenerateTokenErr = errors.New("failed to generate token")
-	WrongPasswordErr        = errors.New("wrong password")
-)
-
+//go:generate mockgen -source $GOFILE -destination mocks/mocks.go -package mocks
 type (
 	userService interface {
 		Create(user *models.User) (*models.User, error)
@@ -29,6 +22,14 @@ type (
 		GenerateToken(userId int) (string, error)
 		ParseToken(token string) (userId int, err error)
 	}
+)
+
+var (
+	UserAlreadyExistsErr    = errors.New("user already exists")
+	UserNotFoundErr         = errors.New("user not found")
+	FailedCreateUserErr     = errors.New("failed to create user")
+	FailedHGenerateTokenErr = errors.New("failed to generate token")
+	WrongPasswordErr        = errors.New("wrong password")
 )
 
 type Service struct {

@@ -30,11 +30,12 @@ func (s *Service) GetAll() []*models.Tweet {
 }
 
 func (s *Service) Create(text string, userId int) (*models.Tweet, error) {
-	tweet, _ := s.tweetRepository.Create(&models.Tweet{
+	tweet, err := s.tweetRepository.Create(&models.Tweet{
 		Text:      text,
 		UserId:    userId,
 		CreatedAt: time.Now(),
 	})
+	_ = err // TODO добавить обработку ошибок
 
 	return tweet, nil
 }
