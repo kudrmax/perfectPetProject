@@ -1,4 +1,4 @@
-package jwt_provider
+package jwt_token_generator
 
 import (
 	"errors"
@@ -29,8 +29,8 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (j *Service) GenerateToken(userId int) (string, error) {
-	expirationTime := time.Now().Add(j.tokenDuration)
+func (s *Service) GenerateToken(userId int) (string, error) {
+	expirationTime := time.Now().Add(s.tokenDuration)
 
 	claims := &Claims{
 		UserId: userId,
@@ -41,17 +41,17 @@ func (j *Service) GenerateToken(userId int) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(j.secretKey))
+	return token.SignedString([]byte(s.secretKey))
 }
 
-func (j *Service) ParseToken(tokenStr string) (userId int, err error) {
+func (s *Service) ParseToken(tokenStr string) (userId int, err error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, UnexpectedSigningMethodErr
 		}
-		return []byte(j.secretKey), nil
+		return []byte(s.secretKey), nil
 	})
 
 	if err != nil || !token.Valid {

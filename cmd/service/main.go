@@ -12,7 +12,7 @@ import (
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
-	"github.com/kudrmax/perfectPetProject/internal/services/jwt_provider"
+	"github.com/kudrmax/perfectPetProject/internal/services/jwt_token_generator"
 	"github.com/kudrmax/perfectPetProject/internal/services/password_hasher"
 	"github.com/kudrmax/perfectPetProject/internal/services/tweets"
 	"github.com/kudrmax/perfectPetProject/internal/services/users"
@@ -45,7 +45,7 @@ func getApiRouter() http.Handler {
 
 	tweetService := tweets.NewService(tweetRepository)
 	userService := users.NewService(userRepository)
-	jwtProviderService := jwt_provider.NewService(jwtSecret, jwtTokenDuration)
+	jwtProviderService := jwt_token_generator.NewService(jwtSecret, jwtTokenDuration)
 	passwordCheckerService := password_hasher.NewService()
 
 	authService := auth.NewService(

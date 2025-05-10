@@ -1,4 +1,4 @@
-package jwt_provider
+package jwt_token_generator
 
 import (
 	"testing"
