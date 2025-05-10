@@ -7,6 +7,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	secretKey         = "secret_key"
+	defaultExpireTime = time.Minute * 10
+)
+
 func TestService_GenerateAndParseToken(t *testing.T) {
 	type args struct {
 		userId int
@@ -31,10 +36,7 @@ func TestService_GenerateAndParseToken(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			j := &Service{
-				secretKey:     "secret_key",
-				tokenDuration: time.Minute * 10,
-			}
+			j := NewService(secretKey, defaultExpireTime)
 
 			token, err := j.GenerateToken(tt.args.userId)
 			require.NoError(t, err)
@@ -56,7 +58,7 @@ func TestService_ParseTokenBadToken(t *testing.T) {
 		args args
 	}{
 		{
-			name: "error",
+			name: "bad token",
 			args: args{
 				token: "123123123123123123",
 			},
@@ -64,10 +66,7 @@ func TestService_ParseTokenBadToken(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			j := &Service{
-				secretKey:     "secret_key",
-				tokenDuration: time.Minute * 10,
-			}
+			j := NewService(secretKey, defaultExpireTime)
 
 			userID, err := j.ParseToken(tt.args.token)
 			require.ErrorIs(t, err, InvalidTokenErr)
@@ -103,10 +102,7 @@ func TestService_ParseTokenExpire(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			expireAfter := time.Millisecond * 1
 
-			j := &Service{
-				secretKey:     "secret_key",
-				tokenDuration: expireAfter,
-			}
+			j := NewService(secretKey, expireAfter)
 
 			token, err := j.GenerateToken(tt.args.userId)
 			require.NoError(t, err)
