@@ -7,7 +7,7 @@ OAPI_PKG := github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 
 # === PUBLIC COMMANDS ===
 
-.PHONY: help codegen
+.PHONY: help codegen test
 
 
 help: ## Показать все команды
@@ -23,7 +23,10 @@ codegen: ## Сгенерировать API и rpc клиенты для Go
 
 	@$(MAKE) _create-openapi-in-one-file
 
-	go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
+	@go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
+
+test:  ## Запустит все тесты
+	@go test ./... | grep -v '\[no test files\]'
 
 # === PRIVATE COMMANDS ===
 
