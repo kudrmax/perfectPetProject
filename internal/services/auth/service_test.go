@@ -60,7 +60,7 @@ func TestService_Register(t *testing.T) {
 			setMockBehavior: func(m *MockFactory) {
 				m.userServiceMock.EXPECT().
 					GetByUsername(username).
-					Return(nil)
+					Return(nil, nil)
 				m.passwordHasherServiceMock.EXPECT().
 					GenerateHashPassword(password).
 					Return(passwordHash, nil)
@@ -99,7 +99,7 @@ func TestService_Register(t *testing.T) {
 							Name:         name,
 							Username:     username,
 							PasswordHash: passwordHash,
-						},
+						}, nil,
 					)
 			},
 		},
@@ -165,7 +165,7 @@ func TestService_Login(t *testing.T) {
 							Name:         name,
 							Username:     username,
 							PasswordHash: passwordHash,
-						},
+						}, nil,
 					)
 				m.passwordHasherServiceMock.EXPECT().
 					CompareHashAndPassword(passwordHash, password).
@@ -185,7 +185,7 @@ func TestService_Login(t *testing.T) {
 			setMockBehavior: func(m *MockFactory) {
 				m.userServiceMock.EXPECT().
 					GetByUsername(username).
-					Return(nil)
+					Return(nil, nil)
 			},
 		},
 	}

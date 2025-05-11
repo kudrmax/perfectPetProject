@@ -2,35 +2,59 @@ package users_repository
 
 import (
 	"github.com/kudrmax/perfectPetProject/internal/models"
-	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/db_emulation"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/storage"
 )
 
-var SetIdFunc = func(user *models.User, id int) {
-	user.Id = id
-}
-
 type Repository struct {
-	db db_emulation.DbEmulation[models.User]
+	db *storage.Storage
 }
 
-func NewRepository() *Repository {
-	return &Repository{
-		db: NewDbEmulation(),
-	}
+func NewRepository(db *storage.Storage) *Repository {
+	return &Repository{db: db}
 }
 
-func (r *Repository) GetByUsername(username string) *models.User {
-	for _, user := range r.db {
-		if user.Username == username {
-			return &user
-		}
+func (r *Repository) GetByUsername(username string) (*models.User, error) {
+	query := `
+		SELECT id, name, username, passwordHash 
+		FROM users 
+		WHERE username = $1
+	`
+
+	var user models.User
+	err := r.db.QueryRow(query, username).
+		Scan(&user.Id, &user.Name, &user.Username, &user.PasswordHash)
+	if err != nil {
+		return nil, r.processGetErrors(err)
 	}
 
-	return nil
+	return &user, nil
 }
 
 func (r *Repository) Create(user *models.User) (*models.User, error) {
-	user = r.db.Create(user, SetIdFunc)
+	query := `
+		INSERT INTO users (name, username, passwordHash) 
+		VALUES ($1, $2, $3) 
+		RETURNING id, name, username, passwordHash
+	`
 
-	return user, nil
+	var newUser models.User
+	err := r.db.QueryRow(query, user.Name, user.Username, user.PasswordHash).
+		Scan(&newUser.Id, &newUser.Name, &newUser.Username, &newUser.PasswordHash)
+	if err != nil {
+		return nil, r.processCreateErrors(err)
+	}
+
+	return &newUser, nil
+}
+
+func (r *Repository) GetAll() ([]*models.User, error) {
+	return nil, nil
+}
+
+func (r *Repository) UpdateByUsername(username string, newUser *models.User) (*models.User, error) {
+	return nil, nil
+}
+
+func (r *Repository) DeleteByUsername(username string) error {
+	return nil
 }

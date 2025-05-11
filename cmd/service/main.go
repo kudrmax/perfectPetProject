@@ -9,6 +9,7 @@ import (
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/create_tweet_handler"
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/get_feed_handler"
 	"github.com/kudrmax/perfectPetProject/internal/http/middlewares/auth_middleware"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/storage"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/tweets_repository"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/auth"
@@ -36,10 +37,25 @@ func getApiRouter() http.Handler {
 		jwtSecret        = "super-secret"
 	)
 
+	var (
+		userStorageConfig = storage.Config{
+			Host:     "localhost", // TODO брать из env переменных
+			Port:     "5432",
+			User:     "postgres",
+			DbName:   "postgres",
+			Password: "postgres",
+		}
+	)
+
 	// repositories
 
+	userStorage, err := storage.New(userStorageConfig) // TODO брать из env переменных (типа метод NewFromEnv)
+	if err != nil {
+		panic(err) // TODO сделать красивое сообщение об ошибке через Log Fatal
+	}
+
 	tweetRepository := tweets_repository.NewRepository()
-	userRepository := users_repository.NewRepository()
+	userRepository := users_repository.NewRepository(userStorage)
 
 	// services
 

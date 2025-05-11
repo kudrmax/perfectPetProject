@@ -56,11 +56,12 @@ func (mr *MockuserServiceMockRecorder) Create(user any) *gomock.Call {
 }
 
 // GetByUsername mocks base method.
-func (m *MockuserService) GetByUsername(username string) *models.User {
+func (m *MockuserService) GetByUsername(username string) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByUsername", username)
 	ret0, _ := ret[0].(*models.User)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetByUsername indicates an expected call of GetByUsername.
