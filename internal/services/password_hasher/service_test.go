@@ -3,6 +3,8 @@ package password_hasher
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,7 +40,7 @@ func TestService_GenerateHashPassword(t *testing.T) {
 	}
 }
 
-func TestService_CompareHashAndPassword(t *testing.T) {
+func TestService_GenerateHashPassword_And_CompareHashAndPassword(t *testing.T) {
 	tests := []struct {
 		name     string
 		password string
@@ -49,24 +51,22 @@ func TestService_CompareHashAndPassword(t *testing.T) {
 			password: "123456",
 		},
 		{
+			name:     "success_strong_symbols",
+			password: "jb76a5*6asdg8%^%$^AS6AS$*G",
+		},
+		{
 			name:     "empty",
 			password: "",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &Service{
-				cost: bcrypt.DefaultCost,
-			}
-			passwordHash, err := s.GenerateHashPassword(tt.password)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GenerateHashPassword() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			s := NewService()
 
-			if !s.CompareHashAndPassword(passwordHash, tt.password) {
-				t.Errorf("CompareHashAndPassword() = %v, want %v", s.CompareHashAndPassword(passwordHash, tt.password), true)
-			}
+			passwordHash, err := s.GenerateHashPassword(tt.password)
+
+			require.NoError(t, err)
+			assert.True(t, s.CompareHashAndPassword(passwordHash, tt.password))
 		})
 	}
 }
