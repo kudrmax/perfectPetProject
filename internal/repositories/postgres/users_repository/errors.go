@@ -20,7 +20,7 @@ func (r *Repository) processGetErrors(err error) error {
 }
 
 func (r *Repository) processCreateErrors(err error) error {
-	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") { // TODO заменить на код ошибки через pgx
 		return ErrUsernameAlreadyExists
 	}
 
