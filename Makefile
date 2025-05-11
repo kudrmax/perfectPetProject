@@ -7,7 +7,7 @@ OAPI_PKG := github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 
 # === PUBLIC COMMANDS ===
 
-.PHONY: help codegen test
+.PHONY: help codegen test debug stop
 
 
 help: ## Показать все команды
@@ -34,6 +34,11 @@ test:  ## Запустит все тесты
 		echo "❌ Некоторые тесты не прошли"; \
 	fi
 
+debug: ## Запускает все зависимости, но не запускает executable файл
+	@docker compose up -d db
+
+stop: ## Останавливает все зависимости и executable файл
+	@docker compose down
 
 # === PRIVATE COMMANDS ===
 

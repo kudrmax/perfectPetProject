@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: db  # TODO понять как лучше называть контейнеры, чтобы они не конфликтовали между разными проектами
+    environment:
+      POSTGRES_USER: postgres  # TODO вынести в .env
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
