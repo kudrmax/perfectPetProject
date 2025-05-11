@@ -100,6 +100,8 @@ func TestService_ParseTokenExpire(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			expireAfter := time.Millisecond * 1
 
 			j := NewService(secretKey, expireAfter)

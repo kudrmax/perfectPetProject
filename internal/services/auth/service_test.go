@@ -106,6 +106,8 @@ func TestService_Register(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mockFactory := createMocks(t)
 			tt.setMockBehavior(mockFactory)
 
@@ -189,6 +191,8 @@ func TestService_Login(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mockFactory := createMocks(t)
 			tt.setMockBehavior(mockFactory)
 
