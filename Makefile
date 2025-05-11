@@ -26,7 +26,14 @@ codegen: ## Сгенерировать API и rpc клиенты для Go
 	@go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
 
 test:  ## Запустит все тесты
-	@go test ./... | grep -v '\[no test files\]'
+	@TEST_RESULT=$$(go test ./... | grep -v '\[no test files\]'); \
+	echo "$$TEST_RESULT"; \
+	if ! echo "$$TEST_RESULT" | grep -q "FAIL:"; then \
+		echo "✅ Все тесты прошли"; \
+	else \
+		echo "❌ Некоторые тесты не прошли"; \
+	fi
+
 
 # === PRIVATE COMMANDS ===
 
