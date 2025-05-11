@@ -28,7 +28,7 @@ codegen: ## Сгенерировать API и rpc клиенты для Go
 test:  ## Запустит все тесты
 	@TEST_RESULT=$$(go test ./... | grep -v '\[no test files\]'); \
 	echo "$$TEST_RESULT"; \
-	if ! echo "$$TEST_RESULT" | grep -q "FAIL:"; then \
+	if ! echo "$$TEST_RESULT" | grep -q "FAIL"; then \
 		echo "✅ Все тесты прошли"; \
 	else \
 		echo "❌ Некоторые тесты не прошли"; \
