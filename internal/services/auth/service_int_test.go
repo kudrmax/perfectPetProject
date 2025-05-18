@@ -6,10 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/kudrmax/perfectPetProject/internal/models"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/testdb"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/users_repository"
 	"github.com/kudrmax/perfectPetProject/internal/services/jwt_token_generator"
@@ -19,7 +17,8 @@ import (
 )
 
 const (
-	password = "some_password"
+	password        = "some_password"
+	anotherPassword = "some_password_another"
 )
 
 func TestServiceAuth(t *testing.T) {
@@ -65,8 +64,8 @@ func (s *testSuite) Test_Register() {
 			user.Username,
 			password,
 		)
-		a.NotEmpty(accessToken)
 		a.NoError(err)
+		a.NotEmpty(accessToken)
 
 		userFromDB := testdb.MustGetUserByUsername(a, s.db, user.Username)
 		a.Equal(user.Username, userFromDB.Username)
@@ -74,10 +73,84 @@ func (s *testSuite) Test_Register() {
 		a.NotEqual(user.PasswordHash, userFromDB.PasswordHash)
 		a.NotEmpty(userFromDB.Id)
 	})
+
+	s.Run("error_user_already_exists", func() {
+		a := s.Require()
+
+		user := fake.User(fake.WithoutPasswordHash())
+
+		testdb.MustAddUser(a, s.db, user)
+
+		accessToken, err := s.self.Register(
+			user.Name,
+			user.Username,
+			password,
+		)
+
+		a.Empty(accessToken)
+		a.ErrorIs(err, UserAlreadyExistsErr)
+	})
 }
 
-func EqualWithoutId(a *require.Assertions, user1, user2 models.User) {
-	user1.Id = 0
-	user2.Id = 0
-	a.Equal(user1, user2)
+func (s *testSuite) Test_Login() {
+	s.Run("success", func() {
+		a := s.Require()
+
+		user := fake.User(fake.WithoutPasswordHash())
+
+		_, err := s.self.Register(user.Name, user.Username, password)
+		a.NoError(err)
+
+		accessTokenFromLogin, err := s.self.Login(user.Username, password)
+		a.NoError(err)
+		a.NotEmpty(accessTokenFromLogin)
+	})
+
+	s.Run("error_not_found", func() {
+		a := s.Require()
+
+		user := fake.User(fake.WithoutPasswordHash())
+
+		accessTokenFromLogin, err := s.self.Login(user.Username, password)
+		a.ErrorIs(err, UserNotFoundErr)
+		a.Empty(accessTokenFromLogin)
+	})
+
+	s.Run("error_wrong_password", func() {
+		a := s.Require()
+
+		user := fake.User(fake.WithoutPasswordHash())
+		_, err := s.self.Register(user.Name, user.Username, password)
+		a.NoError(err)
+
+		accessTokenFromLogin, err := s.self.Login(user.Username, anotherPassword)
+		a.ErrorIs(err, WrongPasswordErr)
+		a.Empty(accessTokenFromLogin)
+	})
+}
+
+func (s *testSuite) Test_ValidateTokenAndGetUserId() {
+	s.Run("success", func() {
+		a := s.Require()
+
+		user := fake.User(fake.WithoutPasswordHash())
+
+		accessToken, err := s.self.Register(user.Name, user.Username, password)
+		a.NoError(err)
+		a.NotEmpty(accessToken)
+
+		user = testdb.MustGetUserByUsername(a, s.db, user.Username)
+
+		userID, err := s.self.ValidateTokenAndGetUserId(accessToken)
+		a.NoError(err)
+		a.Equal(user.Id, userID)
+	})
+
+	s.Run("error_invalid_token", func() {
+		a := s.Require()
+
+		userID, err := s.self.ValidateTokenAndGetUserId("some_other_token")
+		a.Error(err)
+		a.Empty(userID)
+	})
 }
