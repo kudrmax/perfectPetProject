@@ -23,3 +23,9 @@ func WithUsername(username string) userOption {
 		order.Username = username
 	}
 }
+
+func WithoutPasswordHash() userOption {
+	return func(order *models.User) {
+		order.PasswordHash = ""
+	}
+}

@@ -21,15 +21,15 @@ type testSuite struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	db         *sql.DB
-	repository *Repository
+	db   *sql.DB
+	self *Repository
 }
 
 func (s *testSuite) SetupSuite() {
 	s.ctx, s.cancel = context.WithCancel(s.T().Context())
 
 	s.db = testdb.MustInit(s.T())
-	s.repository = New(s.db)
+	s.self = New(s.db)
 }
 
 func (s *testSuite) TearDownSuite() {
@@ -50,7 +50,7 @@ func (s *testSuite) Test_GetByUsername() {
 		testdb.MustAddUser(a, s.db, user2)
 		testdb.MustAddUser(a, s.db, user3)
 
-		got, err := s.repository.GetByUsername(user2.Username)
+		got, err := s.self.GetByUsername(user2.Username)
 
 		a.NoError(err)
 		a.Equal(user2, got)
@@ -59,7 +59,7 @@ func (s *testSuite) Test_GetByUsername() {
 	s.Run("success_not_found", func() {
 		a := s.Require()
 
-		got, err := s.repository.GetByUsername(fake.RandString())
+		got, err := s.self.GetByUsername(fake.RandString())
 
 		a.NoError(err)
 		a.Nil(got)
@@ -68,7 +68,7 @@ func (s *testSuite) Test_GetByUsername() {
 	s.Run("success_empty_username", func() {
 		a := s.Require()
 
-		got, err := s.repository.GetByUsername("")
+		got, err := s.self.GetByUsername("")
 
 		a.NoError(err)
 		a.Nil(got)
