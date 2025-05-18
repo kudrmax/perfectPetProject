@@ -100,11 +100,14 @@ func (s *testSuite) Test_Create() {
 		user := fake.User()
 		testdb.MustAddUser(a, s.db, user)
 
+		userFromDbBefore := testdb.MustGetUserByUsername(a, s.db, user.Username)
 		got, err := s.self.Create(user)
+		userFromDbAfter := testdb.MustGetUserByUsername(a, s.db, user.Username)
 
 		a.Error(err)
 		a.Nil(got)
 		a.Equal(ErrUsernameAlreadyExists, err)
+		a.Equal(userFromDbBefore, userFromDbAfter)
 	})
 
 	s.Run("error_empty_user", func() {
@@ -133,6 +136,9 @@ func (s *testSuite) Test_Create() {
 			a.Error(err)
 			a.Nil(got)
 			a.Equal(ErrEmptyUser, err)
+			if user != nil {
+				a.False(testdb.UserExists(s.db, user.Username))
+			}
 		}
 	})
 }
