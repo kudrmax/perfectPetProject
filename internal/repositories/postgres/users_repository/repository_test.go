@@ -2,13 +2,13 @@ package users_repository
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/storage"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/testdb"
 	"github.com/kudrmax/perfectPetProject/internal/services/test/fake"
-	"github.com/kudrmax/perfectPetProject/internal/services/test/testdb"
 )
 
 func TestRepository_GetByUsername(t *testing.T) {
@@ -21,20 +21,20 @@ type testSuite struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	storage    *storage.Storage // TODO заменить storage на db
+	db         *sql.DB
 	repository *Repository
 }
 
 func (s *testSuite) SetupSuite() {
 	s.ctx, s.cancel = context.WithCancel(s.T().Context())
 
-	s.storage = testdb.MustInit(s.Assert())
-	s.repository = New(s.storage)
+	s.db = testdb.MustInit(s.T())
+	s.repository = New(s.db)
 }
 
 func (s *testSuite) TearDownSuite() {
 	s.cancel()
-	if err := s.storage.Close(); err != nil {
+	if err := s.db.Close(); err != nil {
 		s.FailNow("failed to close database")
 	}
 }
@@ -46,9 +46,9 @@ func (s *testSuite) Test_GetByUsername() {
 		user1 := fake.User()
 		user2 := fake.User()
 		user3 := fake.User()
-		testdb.MustAddUser(a, s.storage.DB, user1)
-		testdb.MustAddUser(a, s.storage.DB, user2)
-		testdb.MustAddUser(a, s.storage.DB, user3)
+		testdb.MustAddUser(a, s.db, user1)
+		testdb.MustAddUser(a, s.db, user2)
+		testdb.MustAddUser(a, s.db, user3)
 
 		got, err := s.repository.GetByUsername(user2.Username)
 

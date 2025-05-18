@@ -1,4 +1,4 @@
-package db_emulation
+package testdb
 
 type DbEmulation[T any] map[int]T
 

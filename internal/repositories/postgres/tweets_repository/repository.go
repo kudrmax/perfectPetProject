@@ -2,7 +2,7 @@ package tweets_repository
 
 import (
 	"github.com/kudrmax/perfectPetProject/internal/models"
-	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/db_emulation"
+	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/testdb"
 )
 
 var SetIdFunc = func(tweet *models.Tweet, id int) {
@@ -10,7 +10,7 @@ var SetIdFunc = func(tweet *models.Tweet, id int) {
 }
 
 type Repository struct {
-	db db_emulation.DbEmulation[models.Tweet]
+	db testdb.DbEmulation[models.Tweet]
 }
 
 func NewRepository() *Repository {

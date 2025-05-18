@@ -1,15 +1,16 @@
 package users_repository
 
 import (
+	"database/sql"
+
 	"github.com/kudrmax/perfectPetProject/internal/models"
-	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/storage"
 )
 
 type Repository struct {
-	db *storage.Storage
+	db *sql.DB
 }
 
-func New(db *storage.Storage) *Repository {
+func New(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 

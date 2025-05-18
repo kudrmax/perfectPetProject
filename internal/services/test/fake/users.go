@@ -4,7 +4,7 @@ import "github.com/kudrmax/perfectPetProject/internal/models"
 
 func User(options ...userOption) *models.User {
 	user := &models.User{
-		Name:         RandString(), // TODO заменить на рандом
+		Name:         RandString(),
 		Username:     RandString(),
 		PasswordHash: RandString(),
 	}
