@@ -53,7 +53,7 @@ func getApiRouter() http.Handler {
 
 	// repositories
 
-	tweetRepository := tweets_repository.NewRepository()
+	tweetRepository := tweets_repository.New(db)
 	userRepository := users_repository.New(db)
 
 	// services
