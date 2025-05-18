@@ -16,7 +16,7 @@ func New(db *sql.DB) *Repository {
 
 func (r *Repository) GetAll() ([]*models.Tweet, error) {
 	query := `
-		SELECT id, user_id, text, created_at, updated_at 
+		SELECT id, user_id, text, created_at 
 		FROM twits 
 	`
 
@@ -28,7 +28,7 @@ func (r *Repository) GetAll() ([]*models.Tweet, error) {
 	tweets := make([]*models.Tweet, 0)
 	for rows.Next() {
 		tweet := new(models.Tweet)
-		err = rows.Scan(&tweet.Id, &tweet.UserId, &tweet.Text, &tweet.CreatedAt, nil)
+		err = rows.Scan(&tweet.Id, &tweet.UserId, &tweet.Text, &tweet.CreatedAt) // TODO как не принимать некоторые параметры?
 		if err != nil {
 			return nil, r.processGetAllErrors(err)
 		}
@@ -47,18 +47,17 @@ func (r *Repository) Create(twit *models.Tweet) (*models.Tweet, error) {
 	query := `
 		INSERT INTO twits (user_id, text) 
 		VALUES ($1, $2) 
-		RETURNING id, created_at, updated_at
+		RETURNING id, created_at
 	`
 
-	var newTwit models.Tweet
 	err := r.db.
-		QueryRow(query, newTwit.UserId, newTwit.Text).
-		Scan(&newTwit.Id, &newTwit.CreatedAt, nil)
+		QueryRow(query, twit.UserId, twit.Text).
+		Scan(&twit.Id, &twit.CreatedAt)
 	if err != nil {
 		return nil, r.processCreateErrors(err)
 	}
 
-	return &newTwit, nil
+	return twit, nil
 }
 
 func empty(twit *models.Tweet) bool {

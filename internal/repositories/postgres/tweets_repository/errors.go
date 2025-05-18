@@ -7,6 +7,7 @@ var (
 )
 
 func (r *Repository) processGetAllErrors(err error) error {
+	// TODO insert or update on table "twits" violates foreign key constraint "fk_user"
 	return err
 }
 

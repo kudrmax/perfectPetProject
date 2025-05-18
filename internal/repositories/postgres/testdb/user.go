@@ -39,3 +39,20 @@ func MustGetUserByUsername(r *require.Assertions, db *sql.DB, username string) *
 
 	return &user
 }
+
+func UserExists(db *sql.DB, username string) bool {
+	query := `
+		SELECT id
+		FROM users
+		WHERE username = $1
+	`
+
+	var user models.User
+	err := db.QueryRow(query, username).Scan(&user.Id)
+
+	if err != nil {
+		return false
+	}
+
+	return true
+}
