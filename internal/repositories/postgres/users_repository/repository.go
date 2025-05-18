@@ -9,11 +9,15 @@ type Repository struct {
 	db *storage.Storage
 }
 
-func NewRepository(db *storage.Storage) *Repository {
+func New(db *storage.Storage) *Repository {
 	return &Repository{db: db}
 }
 
 func (r *Repository) GetByUsername(username string) (*models.User, error) {
+	if username == "" {
+		return nil, nil
+	}
+
 	query := `
 		SELECT id, name, username, passwordHash 
 		FROM users 

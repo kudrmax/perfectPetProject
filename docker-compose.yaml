@@ -13,6 +13,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
+#  test_db:
+#    image: postgres:15
+#    container_name: test_db  # TODO понять как лучше называть контейнеры, чтобы они не конфликтовали между разными проектами
+#    environment:
+#      POSTGRES_USER: postgres_test # TODO перенести в config и от туда же брать данные для создания БД для интеграционных тестов
+#      POSTGRES_PASSWORD: postgres_test
+#      POSTGRES_DB: postgres_test
+#    ports:
+#      - "5431:5432"
 
 volumes:
   postgres_data:

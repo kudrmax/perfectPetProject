@@ -26,7 +26,7 @@ codegen: ## Сгенерировать API и rpc клиенты для Go
 	@go run $(OAPI_PKG) --config $(OAPI_CONFIG) $(OPENAPI_IN_ONE_FILE)
 
 test:  ## Запустит все тесты
-	@TEST_RESULT=$$(go test ./... | grep -v '\[no test files\]'); \
+	@TEST_RESULT=$$(go test ./... -count=1| grep -v '\[no test files\]'); \
 	echo "$$TEST_RESULT"; \
 	if ! echo "$$TEST_RESULT" | grep -q "FAIL"; then \
 		echo "✅ Все тесты прошли"; \
@@ -34,11 +34,15 @@ test:  ## Запустит все тесты
 		echo "❌ Некоторые тесты не прошли"; \
 	fi
 
+
 debug: ## Запускает все зависимости, но не запускает executable файл
 	@docker compose up -d db
 
 stop: ## Останавливает все зависимости и executable файл
 	@docker compose down
+
+make test_dev:
+	@docker compose up test_db
 
 # === PRIVATE COMMANDS ===
 
