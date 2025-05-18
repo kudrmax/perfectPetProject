@@ -5,13 +5,15 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/kudrmax/perfectPetProject/internal/models"
 	"github.com/kudrmax/perfectPetProject/internal/repositories/postgres/testdb"
 	"github.com/kudrmax/perfectPetProject/internal/services/test/fake"
 )
 
-func TestRepository_GetByUsername(t *testing.T) {
+func TestUserRepository(t *testing.T) {
 	suite.Run(t, new(testSuite))
 }
 
@@ -73,4 +75,70 @@ func (s *testSuite) Test_GetByUsername() {
 		a.NoError(err)
 		a.Nil(got)
 	})
+}
+
+func (s *testSuite) Test_Create() {
+	s.Run("success", func() {
+		a := s.Require()
+
+		user := fake.User()
+
+		got, err := s.self.Create(user)
+		userFromDB := testdb.MustGetUserByUsername(a, s.db, user.Username)
+
+		a.NoError(err)
+		a.NotEmpty(got.Id)
+
+		user.Id = got.Id
+		a.Equal(user, got)
+		a.Equal(user, userFromDB)
+	})
+
+	s.Run("error_already_exists", func() {
+		a := s.Require()
+
+		user := fake.User()
+		testdb.MustAddUser(a, s.db, user)
+
+		got, err := s.self.Create(user)
+
+		a.Error(err)
+		a.Nil(got)
+		a.Equal(ErrUsernameAlreadyExists, err)
+	})
+
+	s.Run("error_empty_user", func() {
+		a := s.Require()
+
+		users := []*models.User{
+			func() *models.User {
+				return nil
+			}(),
+
+			func() *models.User {
+				user := fake.User()
+				user.Username = ""
+				return user
+			}(),
+
+			func() *models.User {
+				user := fake.User()
+				user.Name = ""
+				return user
+			}(),
+		}
+
+		for _, user := range users {
+			got, err := s.self.Create(user)
+			a.Error(err)
+			a.Nil(got)
+			a.Equal(ErrEmptyUser, err)
+		}
+	})
+}
+
+func EqualWithoutId(a *require.Assertions, user1, user2 models.User) {
+	user1.Id = 0
+	user2.Id = 0
+	a.Equal(user1, user2)
 }

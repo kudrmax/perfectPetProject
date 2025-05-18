@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrUsernameAlreadyExists = fmt.Errorf("username already exists")
+	ErrEmptyUser             = fmt.Errorf("some field of user is empty")
 )
 
 func (r *Repository) processGetErrors(err error) error {
@@ -16,7 +17,7 @@ func (r *Repository) processGetErrors(err error) error {
 		return nil
 	}
 
-	return nil
+	return err
 }
 
 func (r *Repository) processCreateErrors(err error) error {
@@ -24,5 +25,5 @@ func (r *Repository) processCreateErrors(err error) error {
 		return ErrUsernameAlreadyExists
 	}
 
-	return nil
+	return err
 }

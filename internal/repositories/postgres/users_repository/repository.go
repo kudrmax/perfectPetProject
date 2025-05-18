@@ -36,6 +36,10 @@ func (r *Repository) GetByUsername(username string) (*models.User, error) {
 }
 
 func (r *Repository) Create(user *models.User) (*models.User, error) {
+	if emptyUser(user) {
+		return nil, ErrEmptyUser
+	}
+
 	query := `
 		INSERT INTO users (name, username, passwordHash) 
 		VALUES ($1, $2, $3) 
@@ -62,4 +66,8 @@ func (r *Repository) UpdateByUsername(username string, newUser *models.User) (*m
 
 func (r *Repository) DeleteByUsername(username string) error {
 	return nil
+}
+
+func emptyUser(user *models.User) bool {
+	return user == nil || user.Name == "" || user.Username == ""
 }
