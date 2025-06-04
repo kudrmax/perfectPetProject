@@ -3,7 +3,10 @@ package users_repository
 import (
 	"database/sql"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/kudrmax/perfectPetProject/internal/models"
+	"github.com/kudrmax/perfectPetProject/internal/utils"
 )
 
 type Repository struct {
@@ -14,19 +17,30 @@ func New(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
+const (
+	tableName = "users"
+
+	colID           = "id"
+	colName         = "name"
+	colUsername     = "username"
+	colPasswordHash = "passwordHash"
+)
+
 func (r *Repository) GetByUsername(username string) (*models.User, error) {
 	if username == "" {
 		return nil, nil
 	}
 
-	query := `
-		SELECT id, name, username, passwordHash 
-		FROM users 
-		WHERE username = $1
-	`
+	sb := sq.
+		Select(colID, colName, colUsername, colPasswordHash).
+		From(tableName).
+		Where(sq.Eq{colUsername: username}).
+		PlaceholderFormat(sq.Dollar)
+	query, args := sb.MustSql()
 
 	var user models.User
-	err := r.db.QueryRow(query, username).
+	err := r.db.
+		QueryRow(query, args...).
 		Scan(&user.Id, &user.Name, &user.Username, &user.PasswordHash)
 	if err != nil {
 		return nil, r.processGetErrors(err)
@@ -40,14 +54,17 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 		return nil, ErrEmptyUser
 	}
 
-	query := `
-		INSERT INTO users (name, username, passwordHash) 
-		VALUES ($1, $2, $3) 
-		RETURNING id, name, username, passwordHash
-	`
+	sb := sq.
+		Insert(tableName).
+		Columns(colName, colUsername, colPasswordHash).
+		Values(user.Name, user.Username, user.PasswordHash).
+		Suffix(utils.ReturningSQL(colID, colName, colUsername, colPasswordHash)).
+		PlaceholderFormat(sq.Dollar)
+	query, args := sb.MustSql()
 
 	var newUser models.User
-	err := r.db.QueryRow(query, user.Name, user.Username, user.PasswordHash).
+	err := r.db.
+		QueryRow(query, args...).
 		Scan(&newUser.Id, &newUser.Name, &newUser.Username, &newUser.PasswordHash)
 	if err != nil {
 		return nil, r.processCreateErrors(err)

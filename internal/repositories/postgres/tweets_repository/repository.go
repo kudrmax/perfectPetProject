@@ -4,6 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/kudrmax/perfectPetProject/internal/models"
+	"github.com/kudrmax/perfectPetProject/internal/utils"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 type Repository struct {
@@ -14,11 +17,20 @@ func New(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
+const (
+	tableName = "twits"
+
+	colID        = "id"
+	colUserID    = "user_id"
+	colText      = "text"
+	colCreatedAt = "created_at"
+)
+
 func (r *Repository) GetAll() ([]*models.Tweet, error) {
-	query := `
-		SELECT id, user_id, text, created_at 
-		FROM twits 
-	`
+	sb := sq.
+		Select(colID, colUserID, colText, colCreatedAt).
+		From(tableName)
+	query, _ := sb.MustSql()
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -50,8 +62,16 @@ func (r *Repository) Create(twit *models.Tweet) (*models.Tweet, error) {
 		RETURNING id, created_at
 	`
 
+	sb := sq.
+		Insert(tableName).
+		Columns(colUserID, colText).
+		Values(twit.UserId, twit.Text).
+		Suffix(utils.ReturningSQL(colID, colCreatedAt)).
+		PlaceholderFormat(sq.Dollar)
+	query, args := sb.MustSql()
+
 	err := r.db.
-		QueryRow(query, twit.UserId, twit.Text).
+		QueryRow(query, args...).
 		Scan(&twit.Id, &twit.CreatedAt)
 	if err != nil {
 		return nil, r.processCreateErrors(err)
