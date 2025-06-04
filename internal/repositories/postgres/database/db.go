@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func MustInit(cfg Config) *sql.DB {
-	db, err := sql.Open("postgres", cfg.ToDSN())
+	dsn := cfg.ToDSN()
+
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		panic(fmt.Errorf("failed to open db: %w", err))
 	}
