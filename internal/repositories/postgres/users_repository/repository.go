@@ -38,12 +38,27 @@ func (r *Repository) GetByUsername(username string) (*models.User, error) {
 		PlaceholderFormat(sq.Dollar)
 	query, args := sb.MustSql()
 
+	tx, err := r.db.Begin() // TODO перейти на BeginTx
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback() // TODO убедиться, что такой rollback работает
+		}
+	}()
+
 	var user models.User
-	err := r.db.
+	err = tx.
 		QueryRow(query, args...).
 		Scan(&user.Id, &user.Name, &user.Username, &user.PasswordHash)
 	if err != nil {
+		tx.Rollback()
 		return nil, r.processGetErrors(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return &user, nil
@@ -62,12 +77,26 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 		PlaceholderFormat(sq.Dollar)
 	query, args := sb.MustSql()
 
+	tx, err := r.db.Begin() // TODO перейти на BeginTx
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback() // TODO убедиться, что такой rollback работает
+		}
+	}()
+
 	var newUser models.User
-	err := r.db.
+	err = tx.
 		QueryRow(query, args...).
 		Scan(&newUser.Id, &newUser.Name, &newUser.Username, &newUser.PasswordHash)
 	if err != nil {
 		return nil, r.processCreateErrors(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return &newUser, nil
