@@ -4,7 +4,7 @@ import "github.com/kudrmax/perfectPetProject/internal/models"
 
 type (
 	userRepository interface {
-		GetByUsername(username string) *models.User
+		GetByUsername(username string) (*models.User, error)
 		Create(user *models.User) (*models.User, error)
 	}
 )
@@ -25,6 +25,6 @@ func (s *Service) Create(user *models.User) (*models.User, error) {
 	return s.userRepository.Create(user)
 }
 
-func (s *Service) GetByUsername(username string) (user *models.User) {
+func (s *Service) GetByUsername(username string) (*models.User, error) {
 	return s.userRepository.GetByUsername(username)
 }

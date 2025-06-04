@@ -1,4 +1,4 @@
-package http_const
+package _const
 
 const (
 	UserIdContextKey = "user_id"

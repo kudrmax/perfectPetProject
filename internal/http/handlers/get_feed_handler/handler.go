@@ -10,7 +10,7 @@ import (
 
 type (
 	tweetService interface {
-		GetAll() []*models.Tweet
+		GetAll() ([]*models.Tweet, error)
 	}
 )
 
@@ -32,9 +32,13 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tweets := h.tweetService.GetAll()
+	tweets, err := h.tweetService.GetAll()
+	if err != nil {
+		http.Error(w, "failed to get all tweets", http.StatusBadRequest)
+		return
+	}
 
-	if err := http_common.WriteResponse(w, http.StatusOK, convertToDto(tweets)); err != nil {
+	if err = http_common.WriteResponse(w, http.StatusOK, convertToDto(tweets)); err != nil {
 		// TODO log
 	}
 }

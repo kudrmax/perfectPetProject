@@ -3,8 +3,8 @@ package create_tweet_handler
 import (
 	"net/http"
 
+	"github.com/kudrmax/perfectPetProject/internal/http/const"
 	"github.com/kudrmax/perfectPetProject/internal/http/handlers/http_common"
-	"github.com/kudrmax/perfectPetProject/internal/http/http_const"
 	"github.com/kudrmax/perfectPetProject/internal/http/http_model"
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
@@ -40,7 +40,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	userID := ctx.Value(http_const.UserIdContextKey).(int)
+	userID := ctx.Value(_const.UserIdContextKey).(int)
 	if userID == 0 {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 	}

@@ -10,7 +10,7 @@ import (
 type (
 	userService interface {
 		Create(user *models.User) (*models.User, error)
-		GetByUsername(username string) *models.User
+		GetByUsername(username string) (*models.User, error)
 	}
 
 	passwordHasherService interface {
@@ -51,7 +51,11 @@ func NewService(
 }
 
 func (s *Service) Register(name, username, password string) (accessToken string, err error) {
-	if s.isUserExists(username) {
+	isUserExists, err := s.isUserExists(username)
+	if err != nil {
+		return "", err
+	}
+	if isUserExists {
 		return "", UserAlreadyExistsErr
 	}
 
@@ -71,7 +75,10 @@ func (s *Service) Register(name, username, password string) (accessToken string,
 }
 
 func (s *Service) Login(username, password string) (accessToken string, err error) {
-	user := s.userService.GetByUsername(username)
+	user, err := s.userService.GetByUsername(username)
+	if err != nil {
+		return "", err
+	}
 	if user == nil {
 		return "", UserNotFoundErr
 	}
@@ -87,8 +94,13 @@ func (s *Service) ValidateTokenAndGetUserId(token string) (userId int, err error
 	return s.jwtProviderService.ParseToken(token)
 }
 
-func (s *Service) isUserExists(username string) bool {
-	return s.userService.GetByUsername(username) != nil
+func (s *Service) isUserExists(username string) (bool, error) {
+	user, err := s.userService.GetByUsername(username)
+	if err != nil {
+		return false, err
+	}
+
+	return user != nil, nil
 }
 
 func (s *Service) generateAccessToken(user *models.User) (string, error) {
