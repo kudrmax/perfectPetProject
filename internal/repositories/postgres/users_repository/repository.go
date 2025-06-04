@@ -18,7 +18,8 @@ func New(db *sql.DB) *Repository {
 }
 
 const (
-	tableName       = "users"
+	tableName = "users"
+
 	colID           = "id"
 	colName         = "name"
 	colUsername     = "username"
@@ -52,12 +53,6 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 	if emptyUser(user) {
 		return nil, ErrEmptyUser
 	}
-
-	query := `
-		INSERT INTO users (name, username, passwordHash) 
-		VALUES ($1, $2, $3) 
-		RETURNING id, name, username, passwordHash
-	`
 
 	sb := sq.
 		Insert(tableName).

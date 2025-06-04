@@ -18,7 +18,8 @@ func New(db *sql.DB) *Repository {
 }
 
 const (
-	tableName    = "twits"
+	tableName = "twits"
+
 	colID        = "id"
 	colUserID    = "user_id"
 	colText      = "text"
