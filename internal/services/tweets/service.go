@@ -8,7 +8,7 @@ import (
 
 type (
 	tweetRepository interface {
-		GetAll() []*models.Tweet
+		GetAll() ([]*models.Tweet, error)
 		Create(tweet *models.Tweet) (*models.Tweet, error)
 	}
 )
@@ -25,7 +25,7 @@ func NewService(
 	}
 }
 
-func (s *Service) GetAll() []*models.Tweet {
+func (s *Service) GetAll() ([]*models.Tweet, error) {
 	return s.tweetRepository.GetAll()
 }
 

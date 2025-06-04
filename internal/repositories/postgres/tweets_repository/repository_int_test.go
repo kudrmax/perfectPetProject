@@ -28,6 +28,7 @@ type testSuite struct {
 }
 
 func (s *testSuite) SetupSuite() {
+	// TODO понять почему БД перезатирается после всех тестов
 	s.ctx, s.cancel = context.WithCancel(s.T().Context())
 
 	s.db = testdb.MustInit(s.T())
