@@ -18,11 +18,11 @@ func New(db *sql.DB) *Repository {
 }
 
 const (
-	tableName          = "users"
-	columnID           = "id"
-	columnName         = "name"
-	columnUsername     = "username"
-	columnPasswordHash = "passwordHash"
+	tableName       = "users"
+	colID           = "id"
+	colName         = "name"
+	colUsername     = "username"
+	colPasswordHash = "passwordHash"
 )
 
 func (r *Repository) GetByUsername(username string) (*models.User, error) {
@@ -31,9 +31,9 @@ func (r *Repository) GetByUsername(username string) (*models.User, error) {
 	}
 
 	sb := sq.
-		Select(columnID, columnName, columnUsername, columnPasswordHash).
+		Select(colID, colName, colUsername, colPasswordHash).
 		From(tableName).
-		Where(sq.Eq{columnUsername: username}).
+		Where(sq.Eq{colUsername: username}).
 		PlaceholderFormat(sq.Dollar)
 	query, args := sb.MustSql()
 
@@ -61,9 +61,9 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 
 	sb := sq.
 		Insert(tableName).
-		Columns(columnName, columnUsername, columnPasswordHash).
+		Columns(colName, colUsername, colPasswordHash).
 		Values(user.Name, user.Username, user.PasswordHash).
-		Suffix(utils.ReturningSQL(columnID, columnName, columnUsername, columnPasswordHash)).
+		Suffix(utils.ReturningSQL(colID, colName, colUsername, colPasswordHash)).
 		PlaceholderFormat(sq.Dollar)
 	query, args := sb.MustSql()
 
