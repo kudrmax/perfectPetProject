@@ -32,7 +32,17 @@ func (r *Repository) GetAll() ([]*models.Tweet, error) {
 		From(tableName)
 	query, _ := sb.MustSql()
 
-	rows, err := r.db.Query(query)
+	tx, err := r.db.Begin() // TODO перейти на BeginTx
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback() // TODO убедиться, что такой rollback работает
+		}
+	}()
+
+	rows, err := tx.Query(query)
 	if err != nil {
 		return nil, r.processGetAllErrors(err)
 	}
@@ -48,6 +58,10 @@ func (r *Repository) GetAll() ([]*models.Tweet, error) {
 		tweets = append(tweets, tweet)
 	}
 
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+
 	return tweets, nil
 }
 
@@ -55,12 +69,6 @@ func (r *Repository) Create(twit *models.Tweet) (*models.Tweet, error) {
 	if empty(twit) {
 		return nil, ErrEmptyTwit
 	}
-
-	query := `
-		INSERT INTO twits (user_id, text) 
-		VALUES ($1, $2) 
-		RETURNING id, created_at
-	`
 
 	sb := sq.
 		Insert(tableName).
@@ -70,11 +78,25 @@ func (r *Repository) Create(twit *models.Tweet) (*models.Tweet, error) {
 		PlaceholderFormat(sq.Dollar)
 	query, args := sb.MustSql()
 
-	err := r.db.
+	tx, err := r.db.Begin() // TODO перейти на BeginTx
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback() // TODO убедиться, что такой rollback работает
+		}
+	}()
+
+	err = tx.
 		QueryRow(query, args...).
 		Scan(&twit.Id, &twit.CreatedAt)
 	if err != nil {
 		return nil, r.processCreateErrors(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return twit, nil
