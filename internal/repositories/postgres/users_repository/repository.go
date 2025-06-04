@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/kudrmax/perfectPetProject/internal/models"
+	"github.com/kudrmax/perfectPetProject/internal/utils"
 )
 
 type Repository struct {
@@ -58,8 +59,17 @@ func (r *Repository) Create(user *models.User) (*models.User, error) {
 		RETURNING id, name, username, passwordHash
 	`
 
+	sb := sq.
+		Insert(tableName).
+		Columns(columnName, columnUsername, columnPasswordHash).
+		Values(user.Name, user.Username, user.PasswordHash).
+		Suffix(utils.ReturningSQL(columnID, columnName, columnUsername, columnPasswordHash)).
+		PlaceholderFormat(sq.Dollar)
+	query, args := sb.MustSql()
+
 	var newUser models.User
-	err := r.db.QueryRow(query, user.Name, user.Username, user.PasswordHash).
+	err := r.db.
+		QueryRow(query, args...).
 		Scan(&newUser.Id, &newUser.Name, &newUser.Username, &newUser.PasswordHash)
 	if err != nil {
 		return nil, r.processCreateErrors(err)
