@@ -3,6 +3,8 @@ package users_repository
 import (
 	"database/sql"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/kudrmax/perfectPetProject/internal/models"
 )
 
@@ -14,19 +16,29 @@ func New(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
+const (
+	tableName          = "users"
+	columnID           = "id"
+	columnName         = "name"
+	columnUsername     = "username"
+	columnPasswordHash = "passwordHash"
+)
+
 func (r *Repository) GetByUsername(username string) (*models.User, error) {
 	if username == "" {
 		return nil, nil
 	}
 
-	query := `
-		SELECT id, name, username, passwordHash 
-		FROM users 
-		WHERE username = $1
-	`
+	sb := sq.
+		Select(columnID, columnName, columnUsername, columnPasswordHash).
+		From(tableName).
+		Where(sq.Eq{columnUsername: username}).
+		PlaceholderFormat(sq.Dollar)
+	query, args := sb.MustSql()
 
 	var user models.User
-	err := r.db.QueryRow(query, username).
+	err := r.db.
+		QueryRow(query, args...).
 		Scan(&user.Id, &user.Name, &user.Username, &user.PasswordHash)
 	if err != nil {
 		return nil, r.processGetErrors(err)
